@@ -203,10 +203,10 @@ ul {
   padding: 13px 32px;
   border-radius: 999px;
   font-size: 13px;
-  font-weight: 700;
-  font-family: 'Syne', sans-serif;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-weight: 600;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: capitalize;
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
@@ -287,24 +287,7 @@ ul {
   line-height: 1.0;
   letter-spacing: -0.03em;
   margin-bottom: 18px;
-  color: var(--color-text-primary);
-  animation: nameGlow 3s ease-in-out infinite;
-}
-
-@keyframes nameGlow {
-  0%, 100% {
-    text-shadow:
-      0 0 10px rgba(245, 166, 35, 0.15),
-      0 0 20px rgba(245, 166, 35, 0.08);
-    color: #f0ede6;
-  }
-  50% {
-    text-shadow:
-      0 0 20px rgba(245, 166, 35, 0.6),
-      0 0 40px rgba(245, 166, 35, 0.35),
-      0 0 70px rgba(245, 166, 35, 0.15);
-    color: #ffffff;
-  }
+  color: #f0ede6;
 }
 
 .hero-title {
