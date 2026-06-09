@@ -306,17 +306,16 @@ window.addEventListener('resize', () => {
 });
 
 // ─────────────────────────────────────────
-//  CUSTOM CURSOR — single dot + jelly tail
+//  CUSTOM CURSOR — thick jelly blob trail
 // ─────────────────────────────────────────
 const dot = document.getElementById('cursor-dot');
 
-// Create jelly canvas
-const jc   = document.createElement('canvas');
+const jc = document.createElement('canvas');
 jc.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99997;';
 document.body.appendChild(jc);
 const jCtx = jc.getContext('2d');
-jc.width   = window.innerWidth;
-jc.height  = window.innerHeight;
+jc.width  = window.innerWidth;
+jc.height = window.innerHeight;
 
 window.addEventListener('resize', () => {
   jc.width  = window.innerWidth;
@@ -334,8 +333,8 @@ document.addEventListener('mousemove', e => {
   dot.style.top  = mY + 'px';
 });
 
-// Trail — 24 points each chasing the previous
-const TLEN  = 24;
+// Short trail — only 10 points so it stays thick and close
+const TLEN  = 10;
 const trail = Array.from({ length: TLEN }, () => ({ x: -200, y: -200 }));
 
 function drawJelly() {
@@ -345,62 +344,52 @@ function drawJelly() {
     return;
   }
 
-  // Each point chases the one ahead with decreasing speed
-  // giving a stretchy, elastic feel
-  trail[0].x += (mX - trail[0].x) * 0.28;
-  trail[0].y += (mY - trail[0].y) * 0.28;
+  // Points chase each other with high speed — stays short and snappy
+  trail[0].x += (mX - trail[0].x) * 0.5;
+  trail[0].y += (mY - trail[0].y) * 0.5;
   for (let i = 1; i < TLEN; i++) {
-    trail[i].x += (trail[i-1].x - trail[i].x) * 0.42;
-    trail[i].y += (trail[i-1].y - trail[i].y) * 0.42;
+    trail[i].x += (trail[i-1].x - trail[i].x) * 0.55;
+    trail[i].y += (trail[i-1].y - trail[i].y) * 0.55;
   }
 
   jCtx.clearRect(0, 0, jc.width, jc.height);
 
-  // Draw smooth bezier curve through trail points
-  if (trail[0].x > -100) {
+  if (mX < -100) { requestAnimationFrame(drawJelly); return; }
+
+  // Draw thick tapered circles along trail — creates blob jelly look
+  for (let i = TLEN - 1; i >= 0; i--) {
+    const t       = 1 - i / TLEN;        // 1 at head, 0 at tail
+    const radius  = 2 + t * 9;           // thick at head, thin at tail
+    const opacity = 0.12 + t * 0.55;     // bright at head
+
+    // Outer glow blob
+    const grd = jCtx.createRadialGradient(
+      trail[i].x, trail[i].y, 0,
+      trail[i].x, trail[i].y, radius * 2.5
+    );
+    grd.addColorStop(0,   `rgba(245, 166, 35, ${opacity * 0.9})`);
+    grd.addColorStop(0.5, `rgba(245, 166, 35, ${opacity * 0.4})`);
+    grd.addColorStop(1,   `rgba(245, 166, 35, 0)`);
     jCtx.beginPath();
-    jCtx.moveTo(mX, mY);
-    for (let i = 0; i < TLEN - 1; i++) {
-      const mx = (trail[i].x + trail[i+1].x) / 2;
-      const my = (trail[i].y + trail[i+1].y) / 2;
-      jCtx.quadraticCurveTo(trail[i].x, trail[i].y, mx, my);
-    }
+    jCtx.arc(trail[i].x, trail[i].y, radius * 2.5, 0, Math.PI * 2);
+    jCtx.fillStyle = grd;
+    jCtx.fill();
 
-    // Gradient along the trail — fades to transparent
-    const grad = jCtx.createLinearGradient(mX, mY, trail[TLEN-1].x, trail[TLEN-1].y);
-    grad.addColorStop(0,    'rgba(245, 166, 35, 0.7)');
-    grad.addColorStop(0.3,  'rgba(245, 166, 35, 0.35)');
-    grad.addColorStop(0.7,  'rgba(245, 166, 35, 0.1)');
-    grad.addColorStop(1,    'rgba(245, 166, 35, 0)');
-    jCtx.strokeStyle = grad;
-    jCtx.lineWidth   = 3;
-    jCtx.lineCap     = 'round';
-    jCtx.lineJoin    = 'round';
-    jCtx.shadowBlur  = 12;
-    jCtx.shadowColor = 'rgba(245, 166, 35, 0.6)';
-    jCtx.stroke();
-    jCtx.shadowBlur  = 0;
-
-    // Small glowing dots along trail
-    for (let i = 0; i < TLEN; i += 4) {
-      const t  = 1 - i / TLEN;
-      const r  = t * 2.5;
-      const op = t * 0.5;
-      jCtx.beginPath();
-      jCtx.arc(trail[i].x, trail[i].y, r, 0, Math.PI * 2);
-      jCtx.fillStyle   = `rgba(245, 166, 35, ${op})`;
-      jCtx.shadowBlur  = 6;
-      jCtx.shadowColor = '#f5a623';
-      jCtx.fill();
-      jCtx.shadowBlur  = 0;
-    }
+    // Solid bright core
+    jCtx.beginPath();
+    jCtx.arc(trail[i].x, trail[i].y, radius, 0, Math.PI * 2);
+    jCtx.fillStyle   = `rgba(255, 190, 50, ${opacity})`;
+    jCtx.shadowBlur  = 14;
+    jCtx.shadowColor = '#f5a623';
+    jCtx.fill();
+    jCtx.shadowBlur = 0;
   }
 
   requestAnimationFrame(drawJelly);
 }
 drawJelly();
 
-// Hover states
+// Hover + click states
 document.querySelectorAll('a, button, .btn, .hero-image, .project-card, .contact-item, .tag, .nav-logo')
   .forEach(el => {
     el.addEventListener('mouseenter', () => dot.classList.add('hovering'));
