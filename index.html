@@ -226,82 +226,228 @@
 </script>
 <body>
 
-<!-- ========== ANIMATED BACKGROUND ========== -->
+<!-- ========== ANIMATED BACKGROUND + CURSOR ========== -->
 <canvas id="bg-canvas"></canvas>
 
-<script>
-const canvas = document.getElementById('bg-canvas');
-const ctx = canvas.getContext('2d');
+<!-- Custom cursor elements -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
 
-// Fix canvas to cover full screen
-canvas.style.position = 'fixed';
-canvas.style.top = '0';
-canvas.style.left = '0';
-canvas.style.width = '100%';
-canvas.style.height = '100%';
-canvas.style.zIndex = '-1';
+<!-- Cursor + Background styles -->
+<style>
+  * { cursor: none !important; }
+
+  #cursor-dot {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    background: #f5a623;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease, background 0.2s ease;
+    box-shadow: 0 0 8px #f5a623, 0 0 16px rgba(245,166,35,0.6);
+  }
+
+  #cursor-ring {
+    position: fixed;
+    width: 36px;
+    height: 36px;
+    border: 1.5px solid rgba(245, 166, 35, 0.6);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99998;
+    transform: translate(-50%, -50%);
+    transition: width 0.25s ease, height 0.25s ease,
+                border-color 0.25s ease, background 0.25s ease;
+  }
+
+  #cursor-ring.hovering {
+    width: 56px;
+    height: 56px;
+    border-color: #f5a623;
+    background: rgba(245, 166, 35, 0.06);
+  }
+
+  #cursor-ring.clicking {
+    width: 24px;
+    height: 24px;
+    border-color: #ffcc55;
+    background: rgba(245, 166, 35, 0.15);
+  }
+</style>
+
+<script>
+// ─────────────────────────────────────────
+//  CANVAS SETUP
+// ─────────────────────────────────────────
+const canvas = document.getElementById('bg-canvas');
+const ctx    = canvas.getContext('2d');
+
+canvas.style.position    = 'fixed';
+canvas.style.top         = '0';
+canvas.style.left        = '0';
+canvas.style.width       = '100%';
+canvas.style.height      = '100%';
+canvas.style.zIndex      = '-1';
 canvas.style.pointerEvents = 'none';
 
-let W = canvas.width = window.innerWidth;
+let W = canvas.width  = window.innerWidth;
 let H = canvas.height = window.innerHeight;
 
 window.addEventListener('resize', () => {
-  W = canvas.width = window.innerWidth;
+  W = canvas.width  = window.innerWidth;
   H = canvas.height = window.innerHeight;
 });
 
-// ── PARTICLES ──────────────────────────────
-const PARTICLE_COUNT = 72;
+// ─────────────────────────────────────────
+//  CUSTOM CURSOR
+// ─────────────────────────────────────────
+const dot  = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+
+let mouseX = W / 2, mouseY = H / 2;
+let ringX  = W / 2, ringY  = H / 2;
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  dot.style.left = mouseX + 'px';
+  dot.style.top  = mouseY + 'px';
+});
+
+// Ring follows with smooth lag
+function animateRing() {
+  ringX += (mouseX - ringX) * 0.12;
+  ringY += (mouseY - ringY) * 0.12;
+  ring.style.left = ringX + 'px';
+  ring.style.top  = ringY + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+// Hover effect on links, buttons, images
+document.querySelectorAll('a, button, .btn, .hero-image, .project-card, .contact-item, .tag')
+  .forEach(el => {
+    el.addEventListener('mouseenter', () => ring.classList.add('hovering'));
+    el.addEventListener('mouseleave', () => ring.classList.remove('hovering'));
+  });
+
+// Click burst effect
+document.addEventListener('mousedown', () => {
+  ring.classList.add('clicking');
+  dot.style.transform = 'translate(-50%, -50%) scale(2.5)';
+  spawnClickBurst(mouseX, mouseY);
+});
+document.addEventListener('mouseup', () => {
+  ring.classList.remove('clicking');
+  dot.style.transform = 'translate(-50%, -50%) scale(1)';
+});
+
+// ─────────────────────────────────────────
+//  CLICK BURST PARTICLES
+// ─────────────────────────────────────────
+const bursts = [];
+
+function spawnClickBurst(x, y) {
+  for (let i = 0; i < 10; i++) {
+    const angle = (Math.PI * 2 / 10) * i;
+    bursts.push({
+      x, y,
+      vx: Math.cos(angle) * (Math.random() * 3 + 1.5),
+      vy: Math.sin(angle) * (Math.random() * 3 + 1.5),
+      size: Math.random() * 3 + 1,
+      opacity: 1,
+      decay: Math.random() * 0.04 + 0.03
+    });
+  }
+}
+
+function drawBursts() {
+  for (let i = bursts.length - 1; i >= 0; i--) {
+    const b = bursts[i];
+    b.x += b.vx;
+    b.y += b.vy;
+    b.opacity -= b.decay;
+    b.size *= 0.95;
+    if (b.opacity <= 0) { bursts.splice(i, 1); continue; }
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(245, 166, 35, ${b.opacity})`;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = '#f5a623';
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+}
+
+// ─────────────────────────────────────────
+//  GLOWING PARTICLES
+// ─────────────────────────────────────────
+const PARTICLE_COUNT = 80;
 const particles = [];
 
 class Particle {
   constructor() { this.reset(true); }
 
   reset(initial = false) {
-    this.x = Math.random() * W;
-    this.y = initial ? Math.random() * H : H + 10;
-    this.size = Math.random() * 1.8 + 0.4;
-    this.speedY = Math.random() * 0.5 + 0.2;
-    this.speedX = (Math.random() - 0.5) * 0.3;
-    this.opacity = Math.random() * 0.5 + 0.1;
-    this.pulse = Math.random() * Math.PI * 2;
-    this.pulseSpeed = Math.random() * 0.02 + 0.005;
+    this.x         = Math.random() * W;
+    this.y         = initial ? Math.random() * H : H + 10;
+    this.size      = Math.random() * 2 + 0.5;
+    this.speedY    = Math.random() * 0.5 + 0.15;
+    this.speedX    = (Math.random() - 0.5) * 0.25;
+    this.opacity   = Math.random() * 0.6 + 0.1;
+    this.pulse     = Math.random() * Math.PI * 2;
+    this.pulseSpeed= Math.random() * 0.025 + 0.008;
+    this.glowSize  = this.size * (Math.random() * 4 + 3);
   }
 
   update() {
-    this.y -= this.speedY;
-    this.x += this.speedX;
+    this.y     -= this.speedY;
+    this.x     += this.speedX;
     this.pulse += this.pulseSpeed;
-    this.currentOpacity = this.opacity * (0.7 + 0.3 * Math.sin(this.pulse));
+    this.currentOpacity = this.opacity * (0.6 + 0.4 * Math.sin(this.pulse));
     if (this.y < -10) this.reset();
   }
 
   draw() {
+    // Outer glow
+    const grd = ctx.createRadialGradient(
+      this.x, this.y, 0,
+      this.x, this.y, this.glowSize
+    );
+    grd.addColorStop(0,   `rgba(245, 166, 35, ${this.currentOpacity * 0.8})`);
+    grd.addColorStop(0.4, `rgba(245, 166, 35, ${this.currentOpacity * 0.3})`);
+    grd.addColorStop(1,   `rgba(245, 166, 35, 0)`);
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.glowSize, 0, Math.PI * 2);
+    ctx.fillStyle = grd;
+    ctx.fill();
+
+    // Bright core dot
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(245, 166, 35, ${this.currentOpacity})`;
+    ctx.fillStyle = `rgba(255, 210, 80, ${this.currentOpacity})`;
     ctx.fill();
   }
 }
 
-for (let i = 0; i < PARTICLE_COUNT; i++) {
-  particles.push(new Particle());
-}
+for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
 
-// ── GRID LINES ─────────────────────────────
+// ─────────────────────────────────────────
+//  SCROLLING GRID
+// ─────────────────────────────────────────
 const GRID_COLS = 10;
 const GRID_ROWS = 10;
-let gridOffset = 0;
-const GRID_SPEED = 0.3;
+let gridOffset  = 0;
 
 function drawGrid() {
   const colW = W / GRID_COLS;
   const rowH = H / GRID_ROWS;
-
   ctx.strokeStyle = 'rgba(245, 166, 35, 0.04)';
-  ctx.lineWidth = 0.5;
+  ctx.lineWidth   = 0.5;
 
-  // Vertical lines — static
   for (let c = 0; c <= GRID_COLS; c++) {
     ctx.beginPath();
     ctx.moveTo(c * colW, 0);
@@ -309,8 +455,7 @@ function drawGrid() {
     ctx.stroke();
   }
 
-  // Horizontal lines — scroll downward
-  gridOffset = (gridOffset + GRID_SPEED) % rowH;
+  gridOffset = (gridOffset + 0.3) % rowH;
   for (let r = -1; r <= GRID_ROWS + 1; r++) {
     const y = r * rowH + gridOffset;
     ctx.beginPath();
@@ -320,102 +465,94 @@ function drawGrid() {
   }
 }
 
-// ── SHOOTING STARS ─────────────────────────
+// ─────────────────────────────────────────
+//  SHOOTING STARS
+// ─────────────────────────────────────────
 const shootingStars = [];
-const MAX_STARS = 3;
 
 class ShootingStar {
   constructor() { this.spawn(); }
 
   spawn() {
-    this.x = Math.random() * W * 0.7;
-    this.y = Math.random() * H * 0.4;
-    this.len = Math.random() * 120 + 60;
-    this.speed = Math.random() * 6 + 4;
+    this.x       = Math.random() * W * 0.7;
+    this.y       = Math.random() * H * 0.4;
+    this.len     = Math.random() * 130 + 60;
+    this.speed   = Math.random() * 7 + 4;
     this.opacity = 0;
-    this.fadeIn = true;
-    this.angle = Math.PI / 5;
-    this.active = false;
-    this.delay = Math.random() * 300;
-    this.timer = 0;
+    this.fadeIn  = true;
+    this.angle   = Math.PI / 5;
+    this.active  = false;
+    this.delay   = Math.random() * 300;
+    this.timer   = 0;
   }
 
   update() {
     this.timer++;
     if (this.timer < this.delay) return;
     this.active = true;
-
-    if (this.fadeIn) {
-      this.opacity += 0.06;
-      if (this.opacity >= 1) this.fadeIn = false;
-    } else {
-      this.opacity -= 0.03;
-    }
-
+    this.fadeIn ? (this.opacity += 0.06) : (this.opacity -= 0.025);
+    if (this.opacity >= 1) this.fadeIn = false;
     this.x += Math.cos(this.angle) * this.speed;
     this.y += Math.sin(this.angle) * this.speed;
-
-    if (this.opacity <= 0 || this.x > W + 100 || this.y > H + 100) {
-      this.spawn();
-    }
+    if (this.opacity <= 0 || this.x > W + 100) this.spawn();
   }
 
   draw() {
     if (!this.active || this.opacity <= 0) return;
-    const tailX = this.x - Math.cos(this.angle) * this.len;
-    const tailY = this.y - Math.sin(this.angle) * this.len;
-
-    const grad = ctx.createLinearGradient(tailX, tailY, this.x, this.y);
-    grad.addColorStop(0, `rgba(245, 166, 35, 0)`);
-    grad.addColorStop(0.6, `rgba(245, 166, 35, ${this.opacity * 0.4})`);
-    grad.addColorStop(1, `rgba(255, 200, 80, ${this.opacity})`);
-
+    const tx = this.x - Math.cos(this.angle) * this.len;
+    const ty = this.y - Math.sin(this.angle) * this.len;
+    const g  = ctx.createLinearGradient(tx, ty, this.x, this.y);
+    g.addColorStop(0,   'rgba(245,166,35,0)');
+    g.addColorStop(0.6, `rgba(245,166,35,${this.opacity * 0.4})`);
+    g.addColorStop(1,   `rgba(255,200,80,${this.opacity})`);
     ctx.beginPath();
-    ctx.moveTo(tailX, tailY);
+    ctx.moveTo(tx, ty);
     ctx.lineTo(this.x, this.y);
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = g;
+    ctx.lineWidth   = 1.5;
+    ctx.shadowBlur  = 10;
+    ctx.shadowColor = '#f5a623';
     ctx.stroke();
-
-    // Bright tip
+    ctx.shadowBlur  = 0;
     ctx.beginPath();
-    ctx.arc(this.x, this.y, 1.5, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255, 220, 100, ${this.opacity})`;
+    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,220,100,${this.opacity})`;
+    ctx.shadowBlur  = 14;
+    ctx.shadowColor = '#ffcc55';
     ctx.fill();
+    ctx.shadowBlur  = 0;
   }
 }
 
-for (let i = 0; i < MAX_STARS; i++) {
-  shootingStars.push(new ShootingStar());
-}
+for (let i = 0; i < 3; i++) shootingStars.push(new ShootingStar());
 
-// ── CORNER GLOW ORBS ───────────────────────
+// ─────────────────────────────────────────
+//  CORNER GLOW ORBS
+// ─────────────────────────────────────────
 function drawOrbs() {
-  // Top-left warm orb
   const g1 = ctx.createRadialGradient(0, 0, 0, 0, 0, W * 0.45);
-  g1.addColorStop(0, 'rgba(245, 166, 35, 0.06)');
-  g1.addColorStop(1, 'rgba(245, 166, 35, 0)');
+  g1.addColorStop(0, 'rgba(245,166,35,0.07)');
+  g1.addColorStop(1, 'rgba(245,166,35,0)');
   ctx.fillStyle = g1;
   ctx.fillRect(0, 0, W, H);
 
-  // Bottom-right cool orb
   const g2 = ctx.createRadialGradient(W, H, 0, W, H, W * 0.5);
-  g2.addColorStop(0, 'rgba(180, 100, 20, 0.05)');
-  g2.addColorStop(1, 'rgba(180, 100, 20, 0)');
+  g2.addColorStop(0, 'rgba(180,100,20,0.05)');
+  g2.addColorStop(1, 'rgba(180,100,20,0)');
   ctx.fillStyle = g2;
   ctx.fillRect(0, 0, W, H);
 }
 
-// ── MAIN LOOP ──────────────────────────────
+// ─────────────────────────────────────────
+//  MAIN LOOP
+// ─────────────────────────────────────────
 function animate() {
   ctx.clearRect(0, 0, W, H);
-
   drawOrbs();
   drawGrid();
-
   particles.forEach(p => { p.update(); p.draw(); });
   shootingStars.forEach(s => { s.update(); s.draw(); });
-
+  drawBursts();
   requestAnimationFrame(animate);
 }
 
