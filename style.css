@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Outfit:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@400;500;600;700&family=Outfit:wght@300;400;500&display=swap');
 
 /* =========================================
    CSS VARIABLES
@@ -202,15 +202,16 @@ ul {
   display: inline-block;
   padding: 13px 32px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  font-family: 'Outfit', sans-serif;
-  letter-spacing: 0.08em;
-  text-transform: capitalize;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.02em;
+  text-transform: none;
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
 }
+
 /* Primary button — amber filled with glow */
 .btn-primary {
   background: var(--color-accent);
