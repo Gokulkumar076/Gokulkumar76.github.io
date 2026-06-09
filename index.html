@@ -242,52 +242,60 @@
 <!-- ========== ANIMATED BACKGROUND + CURSOR ========== -->
 <canvas id="bg-canvas"></canvas>
 
-<!-- Custom cursor elements -->
+<!-- Custom cursor -->
 <div id="cursor-dot"></div>
-<div id="cursor-ring"></div>
 
-<!-- Cursor + Background styles -->
 <style>
   * { cursor: none !important; }
 
   #cursor-dot {
     position: fixed;
-    width: 6px;
-    height: 6px;
+    width: 10px;
+    height: 10px;
     background: #f5a623;
     border-radius: 50%;
     pointer-events: none;
     z-index: 99999;
     transform: translate(-50%, -50%);
-    transition: transform 0.1s ease, background 0.2s ease;
-    box-shadow: 0 0 8px #f5a623, 0 0 16px rgba(245,166,35,0.6);
+    box-shadow:
+      0 0 8px #f5a623,
+      0 0 18px rgba(245, 166, 35, 0.7),
+      0 0 32px rgba(245, 166, 35, 0.3);
+    transition: transform 0.15s ease, width 0.2s ease,
+                height 0.2s ease, box-shadow 0.2s ease;
   }
 
-  #cursor-ring {
+  #cursor-dot.hovering {
+    width: 16px;
+    height: 16px;
+    box-shadow:
+      0 0 12px #f5a623,
+      0 0 28px rgba(245, 166, 35, 0.8),
+      0 0 50px rgba(245, 166, 35, 0.4);
+  }
+
+  #cursor-dot.clicking {
+    width: 6px;
+    height: 6px;
+    box-shadow:
+      0 0 20px #f5a623,
+      0 0 40px rgba(245, 166, 35, 0.9);
+  }
+
+  /* Jelly tail canvas — sits behind dot */
+  #jelly-canvas {
     position: fixed;
-    width: 36px;
-    height: 36px;
-    border: 1.5px solid rgba(245, 166, 35, 0.6);
-    border-radius: 50%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     pointer-events: none;
-    z-index: 99998;
-    transform: translate(-50%, -50%);
-    transition: width 0.25s ease, height 0.25s ease,
-                border-color 0.25s ease, background 0.25s ease;
+    z-index: 99997;
   }
 
-  #cursor-ring.hovering {
-    width: 56px;
-    height: 56px;
-    border-color: #f5a623;
-    background: rgba(245, 166, 35, 0.06);
-  }
-
-  #cursor-ring.clicking {
-    width: 24px;
-    height: 24px;
-    border-color: #ffcc55;
-    background: rgba(245, 166, 35, 0.15);
+  /* Hide custom cursor on mobile */
+  @media (max-width: 768px) {
+    * { cursor: auto !important; }
+    #cursor-dot { display: none; }
+    #jelly-canvas { display: none; }
   }
 </style>
 
@@ -315,13 +323,30 @@ window.addEventListener('resize', () => {
 });
 
 // ─────────────────────────────────────────
-//  CUSTOM CURSOR
+//  CUSTOM CURSOR — dot + jelly tail
 // ─────────────────────────────────────────
-const dot  = document.getElementById('cursor-dot');
-const ring = document.getElementById('cursor-ring');
+const dot = document.getElementById('cursor-dot');
 
-let mouseX = W / 2, mouseY = H / 2;
-let ringX  = W / 2, ringY  = H / 2;
+// Jelly tail canvas
+const jc  = document.createElement('canvas');
+jc.id = 'jelly-canvas';
+document.body.appendChild(jc);
+const jCtx = jc.getContext('2d');
+jc.width   = window.innerWidth;
+jc.height  = window.innerHeight;
+window.addEventListener('resize', () => {
+  jc.width  = window.innerWidth;
+  jc.height = window.innerHeight;
+});
+
+let mouseX = window.innerWidth / 2;
+let mouseY = window.innerHeight / 2;
+
+// Trail points for jelly effect
+const TRAIL_LEN = 18;
+const trail = Array.from({ length: TRAIL_LEN }, () => ({
+  x: mouseX, y: mouseY
+}));
 
 document.addEventListener('mousemove', e => {
   mouseX = e.clientX;
@@ -330,32 +355,50 @@ document.addEventListener('mousemove', e => {
   dot.style.top  = mouseY + 'px';
 });
 
-// Ring follows with smooth lag
-function animateRing() {
-  ringX += (mouseX - ringX) * 0.12;
-  ringY += (mouseY - ringY) * 0.12;
-  ring.style.left = ringX + 'px';
-  ring.style.top  = ringY + 'px';
-  requestAnimationFrame(animateRing);
-}
-animateRing();
+function drawJelly() {
+  // Shift trail — each point chases the one ahead
+  trail[0].x += (mouseX - trail[0].x) * 0.35;
+  trail[0].y += (mouseY - trail[0].y) * 0.35;
+  for (let i = 1; i < TRAIL_LEN; i++) {
+    trail[i].x += (trail[i-1].x - trail[i].x) * 0.45;
+    trail[i].y += (trail[i-1].y - trail[i].y) * 0.45;
+  }
 
-// Hover effect on links, buttons, images
-document.querySelectorAll('a, button, .btn, .hero-image, .project-card, .contact-item, .tag')
+  jCtx.clearRect(0, 0, jc.width, jc.height);
+
+  // Draw tapered glowing tail
+  for (let i = 0; i < TRAIL_LEN - 1; i++) {
+    const t       = 1 - i / TRAIL_LEN;
+    const radius  = t * 5;
+    const opacity = t * 0.55;
+
+    jCtx.beginPath();
+    jCtx.arc(trail[i].x, trail[i].y, Math.max(radius, 0.5), 0, Math.PI * 2);
+    jCtx.fillStyle = `rgba(245, 166, 35, ${opacity})`;
+    jCtx.shadowBlur  = 10 * t;
+    jCtx.shadowColor = '#f5a623';
+    jCtx.fill();
+    jCtx.shadowBlur  = 0;
+  }
+
+  requestAnimationFrame(drawJelly);
+}
+drawJelly();
+
+// Hover effect
+document.querySelectorAll('a, button, .btn, .hero-image, .project-card, .contact-item, .tag, .nav-logo')
   .forEach(el => {
-    el.addEventListener('mouseenter', () => ring.classList.add('hovering'));
-    el.addEventListener('mouseleave', () => ring.classList.remove('hovering'));
+    el.addEventListener('mouseenter', () => dot.classList.add('hovering'));
+    el.addEventListener('mouseleave', () => dot.classList.remove('hovering'));
   });
 
-// Click burst effect
+// Click effect
 document.addEventListener('mousedown', () => {
-  ring.classList.add('clicking');
-  dot.style.transform = 'translate(-50%, -50%) scale(2.5)';
+  dot.classList.add('clicking');
   spawnClickBurst(mouseX, mouseY);
 });
 document.addEventListener('mouseup', () => {
-  ring.classList.remove('clicking');
-  dot.style.transform = 'translate(-50%, -50%) scale(1)';
+  dot.classList.remove('clicking');
 });
 
 // ─────────────────────────────────────────
