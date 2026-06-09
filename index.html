@@ -247,16 +247,13 @@
 <!-- ========== ANIMATED BACKGROUND + CURSOR ========== -->
 <canvas id="bg-canvas"></canvas>
 
-<!-- Custom cursor -->
-<div id="cursor-dot"></div>
-
 <style>
   * { cursor: none !important; }
 
   #cursor-dot {
     position: fixed;
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     background: #f5a623;
     border-radius: 50%;
     pointer-events: none;
@@ -264,34 +261,24 @@
     left: -100px;
     top: -100px;
     transform: translate(-50%, -50%);
-    box-shadow:
-      0 0 6px #f5a623,
-      0 0 14px rgba(245, 166, 35, 0.8),
-      0 0 28px rgba(245, 166, 35, 0.4);
-    transition: width 0.15s ease, height 0.15s ease,
-                box-shadow 0.15s ease;
+    transition: width 0.12s ease, height 0.12s ease;
   }
 
   #cursor-dot.hovering {
-    width: 14px;
-    height: 14px;
-    box-shadow:
-      0 0 10px #f5a623,
-      0 0 24px rgba(245, 166, 35, 0.9),
-      0 0 44px rgba(245, 166, 35, 0.5);
+    width: 16px;
+    height: 16px;
   }
 
   #cursor-dot.clicking {
     width: 5px;
     height: 5px;
-    box-shadow:
-      0 0 16px #f5a623,
-      0 0 36px rgba(245, 166, 35, 1);
   }
 
   @media (max-width: 768px) {
     * { cursor: auto !important; }
-    #cursor-dot { display: none !important; }
+    #cursor-dot,
+    #cursor-dot.hovering,
+    #cursor-dot.clicking { display: none !important; }
   }
 </style>
 
