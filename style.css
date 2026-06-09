@@ -662,11 +662,20 @@ ul {
   .detail-item { flex-direction: column; gap: 4px; }
   .contact-item { max-width: 100%; }
 }
-/* ========== PROFILE IMAGE CLICK GLOW ========== */
+/* Profile hover glow — always visible on hover */
+.hero-image:hover {
+  box-shadow:
+    0 0 0 3px rgba(245, 166, 35, 0.3),
+    0 0 30px rgba(245, 166, 35, 0.4),
+    0 0 60px rgba(245, 166, 35, 0.15);
+  border-color: rgba(245, 166, 35, 0.6);
+}
+
+/* Profile click glow — triggers on click */
 .hero-image.clicked {
   box-shadow:
-    0 0 0 4px rgba(245, 166, 35, 0.4),
-    0 0 40px rgba(245, 166, 35, 0.5),
-    0 0 80px rgba(245, 166, 35, 0.2);
+    0 0 0 5px rgba(245, 166, 35, 0.5),
+    0 0 50px rgba(245, 166, 35, 0.7),
+    0 0 100px rgba(245, 166, 35, 0.3);
   border-color: #f5a623;
 }
