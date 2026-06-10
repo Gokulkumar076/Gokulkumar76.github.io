@@ -630,27 +630,116 @@ function animate() {
 animate();
 </script>
 <script>
-  // 3D tilt effect — only activates when cursor is INSIDE the image
   const heroImage = document.querySelector('.hero-image');
 
-  heroImage.addEventListener('mousemove', (e) => {
-    const rect = heroImage.getBoundingClientRect();
+  let currentTiltX = 0;
+  let currentTiltY = 0;
+  let targetTiltX  = 0;
+  let targetTiltY  = 0;
+  let isHovering   = false;
+  let animFrame;
 
-    // Cursor position relative to center of image
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
+  // Smoothly interpolate current tilt toward target
+  function animateTilt() {
+    currentTiltX += (targetTiltX - currentTiltX) * 0.06;
+    currentTiltY += (targetTiltY - currentTiltY) * 0.06;
+
+    // Glow intensity based on tilt amount
+    const tiltAmount = Math.sqrt(currentTiltX ** 2 + currentTiltY ** 2);
+    const glowSize   = 20 + tiltAmount * 3;
+    const glowOpacity = 0.3 + tiltAmount * 0.02;
+
+    heroImage.style.transform = `
+      perspective(700px)
+      rotateX(${currentTiltX}deg)
+      rotateY(${currentTiltY}deg)
+      scale(1.05)
+    `;
+
+    // Dynamic glow that shifts direction with the tilt
+    const glowX = -currentTiltY * 2;
+    const glowY =  currentTiltX * 2;
+    heroImage.style.boxShadow = `
+      ${glowX}px ${glowY}px ${glowSize}px rgba(245, 166, 35, ${glowOpacity}),
+      0px 0px ${glowSize * 2}px rgba(245, 166, 35, ${glowOpacity * 0.4}),
+      0 0 ${glowSize * 3}px rgba(245, 166, 35, ${glowOpacity * 0.15})
+    `;
+
+    // Shift the image inside the circle slightly opposite to tilt
+    // giving a parallax depth illusion
+    const imgEl = heroImage.querySelector('img');
+    if (imgEl) {
+      imgEl.style.transform = `
+        translateX(${-currentTiltY * 1.5}px)
+        translateY(${currentTiltX * 1.5}px)
+        scale(1.08)
+      `;
+    }
+
+    animFrame = requestAnimationFrame(animateTilt);
+  }
+
+  heroImage.addEventListener('mouseenter', () => {
+    isHovering = true;
+    cancelAnimationFrame(animFrame);
+    animateTilt();
+  });
+
+  heroImage.addEventListener('mousemove', (e) => {
+    const rect    = heroImage.getBoundingClientRect();
+    const centerX = rect.left + rect.width  / 2;
+    const centerY = rect.top  + rect.height / 2;
     const deltaX  = e.clientX - centerX;
     const deltaY  = e.clientY - centerY;
 
-    // Max tilt 20 degrees
-    const tiltX =  (deltaY / (rect.height / 2)) * 20;
-    const tiltY = -(deltaX / (rect.width  / 2)) * 20;
-
-    heroImage.style.transform = `perspective(600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.04)`;
+    targetTiltX =  (deltaY / (rect.height / 2)) * 18;
+    targetTiltY = -(deltaX / (rect.width  / 2)) * 18;
   });
 
-  // Reset when cursor LEAVES the image
   heroImage.addEventListener('mouseleave', () => {
-    heroImage.style.transform = `perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)`;
+    isHovering  = false;
+    targetTiltX = 0;
+    targetTiltY = 0;
+
+    // Let the animation loop settle back to 0 smoothly
+    // then stop it once it's close enough
+    function resetLoop() {
+      currentTiltX += (0 - currentTiltX) * 0.08;
+      currentTiltY += (0 - currentTiltY) * 0.08;
+
+      const tiltAmount = Math.sqrt(currentTiltX ** 2 + currentTiltY ** 2);
+      const glowOpacity = Math.max(0, tiltAmount * 0.02);
+
+      heroImage.style.transform = `
+        perspective(700px)
+        rotateX(${currentTiltX}deg)
+        rotateY(${currentTiltY}deg)
+        scale(1)
+      `;
+      heroImage.style.boxShadow = `0 0 ${tiltAmount * 3}px rgba(245, 166, 35, ${glowOpacity})`;
+
+      const imgEl = heroImage.querySelector('img');
+      if (imgEl) {
+        imgEl.style.transform = `
+          translateX(${-currentTiltY * 1.5}px)
+          translateY(${currentTiltX * 1.5}px)
+          scale(1)
+        `;
+      }
+
+      // Stop loop once fully settled
+      if (tiltAmount > 0.05) {
+        animFrame = requestAnimationFrame(resetLoop);
+      } else {
+        currentTiltX = 0;
+        currentTiltY = 0;
+        heroImage.style.transform  = '';
+        heroImage.style.boxShadow  = '';
+        if (imgEl) imgEl.style.transform = '';
+      }
+    }
+
+    cancelAnimationFrame(animFrame);
+    resetLoop();
   });
 </script>
