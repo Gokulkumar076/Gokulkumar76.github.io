@@ -628,3 +628,34 @@ function animate() {
 
 animate();
 </script>
+<script>
+  // 3D tilt effect on profile image
+  const heroImage = document.querySelector('.hero-image');
+
+  document.addEventListener('mousemove', (e) => {
+    if (!heroImage) return;
+
+    const rect = heroImage.getBoundingClientRect();
+
+    // Center of the image
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    // Distance of cursor from center of image
+    const deltaX = e.clientX - centerX;
+    const deltaY = e.clientY - centerY;
+
+    // Convert to tilt degrees — max 20 degrees
+    const tiltX = (deltaY / window.innerHeight) * 20;
+    const tiltY = -(deltaX / window.innerWidth) * 20;
+
+    // Apply 3D rotation
+    heroImage.style.transform = `perspective(600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.04)`;
+  });
+
+  // Reset tilt when cursor leaves the page
+  document.addEventListener('mouseleave', () => {
+    if (!heroImage) return;
+    heroImage.style.transform = `perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)`;
+  });
+</script>
