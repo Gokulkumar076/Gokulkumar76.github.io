@@ -630,33 +630,27 @@ function animate() {
 animate();
 </script>
 <script>
-  // 3D tilt effect on profile image
+  // 3D tilt effect — only activates when cursor is INSIDE the image
   const heroImage = document.querySelector('.hero-image');
 
-  document.addEventListener('mousemove', (e) => {
-    if (!heroImage) return;
-
+  heroImage.addEventListener('mousemove', (e) => {
     const rect = heroImage.getBoundingClientRect();
 
-    // Center of the image
+    // Cursor position relative to center of image
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
+    const deltaX  = e.clientX - centerX;
+    const deltaY  = e.clientY - centerY;
 
-    // Distance of cursor from center of image
-    const deltaX = e.clientX - centerX;
-    const deltaY = e.clientY - centerY;
+    // Max tilt 20 degrees
+    const tiltX =  (deltaY / (rect.height / 2)) * 20;
+    const tiltY = -(deltaX / (rect.width  / 2)) * 20;
 
-    // Convert to tilt degrees — max 20 degrees
-    const tiltX = (deltaY / window.innerHeight) * 20;
-    const tiltY = -(deltaX / window.innerWidth) * 20;
-
-    // Apply 3D rotation
     heroImage.style.transform = `perspective(600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.04)`;
   });
 
-  // Reset tilt when cursor leaves the page
-  document.addEventListener('mouseleave', () => {
-    if (!heroImage) return;
+  // Reset when cursor LEAVES the image
+  heroImage.addEventListener('mouseleave', () => {
     heroImage.style.transform = `perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)`;
   });
 </script>
