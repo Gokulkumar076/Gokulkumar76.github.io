@@ -636,17 +636,14 @@ animate();
   let currentTiltY = 0;
   let targetTiltX  = 0;
   let targetTiltY  = 0;
-  let isHovering   = false;
   let animFrame;
 
-  // Smoothly interpolate current tilt toward target
   function animateTilt() {
     currentTiltX += (targetTiltX - currentTiltX) * 0.06;
     currentTiltY += (targetTiltY - currentTiltY) * 0.06;
 
-    // Glow intensity based on tilt amount
-    const tiltAmount = Math.sqrt(currentTiltX ** 2 + currentTiltY ** 2);
-    const glowSize   = 20 + tiltAmount * 3;
+    const tiltAmount  = Math.sqrt(currentTiltX ** 2 + currentTiltY ** 2);
+    const glowSize    = 20 + tiltAmount * 3;
     const glowOpacity = 0.3 + tiltAmount * 0.02;
 
     heroImage.style.transform = `
@@ -656,7 +653,7 @@ animate();
       scale(1.05)
     `;
 
-    // Dynamic glow that shifts direction with the tilt
+    // Glow shifts direction with tilt
     const glowX = -currentTiltY * 2;
     const glowY =  currentTiltX * 2;
     heroImage.style.boxShadow = `
@@ -665,22 +662,10 @@ animate();
       0 0 ${glowSize * 3}px rgba(245, 166, 35, ${glowOpacity * 0.15})
     `;
 
-    // Shift the image inside the circle slightly opposite to tilt
-    // giving a parallax depth illusion
-    const imgEl = heroImage.querySelector('img');
-    if (imgEl) {
-      imgEl.style.transform = `
-        translateX(${-currentTiltY * 1.5}px)
-        translateY(${currentTiltX * 1.5}px)
-        scale(1.08)
-      `;
-    }
-
     animFrame = requestAnimationFrame(animateTilt);
   }
 
   heroImage.addEventListener('mouseenter', () => {
-    isHovering = true;
     cancelAnimationFrame(animFrame);
     animateTilt();
   });
@@ -697,17 +682,14 @@ animate();
   });
 
   heroImage.addEventListener('mouseleave', () => {
-    isHovering  = false;
     targetTiltX = 0;
     targetTiltY = 0;
 
-    // Let the animation loop settle back to 0 smoothly
-    // then stop it once it's close enough
     function resetLoop() {
       currentTiltX += (0 - currentTiltX) * 0.08;
       currentTiltY += (0 - currentTiltY) * 0.08;
 
-      const tiltAmount = Math.sqrt(currentTiltX ** 2 + currentTiltY ** 2);
+      const tiltAmount  = Math.sqrt(currentTiltX ** 2 + currentTiltY ** 2);
       const glowOpacity = Math.max(0, tiltAmount * 0.02);
 
       heroImage.style.transform = `
@@ -716,26 +698,17 @@ animate();
         rotateY(${currentTiltY}deg)
         scale(1)
       `;
-      heroImage.style.boxShadow = `0 0 ${tiltAmount * 3}px rgba(245, 166, 35, ${glowOpacity})`;
+      heroImage.style.boxShadow = `
+        0 0 ${tiltAmount * 3}px rgba(245, 166, 35, ${glowOpacity})
+      `;
 
-      const imgEl = heroImage.querySelector('img');
-      if (imgEl) {
-        imgEl.style.transform = `
-          translateX(${-currentTiltY * 1.5}px)
-          translateY(${currentTiltX * 1.5}px)
-          scale(1)
-        `;
-      }
-
-      // Stop loop once fully settled
       if (tiltAmount > 0.05) {
         animFrame = requestAnimationFrame(resetLoop);
       } else {
         currentTiltX = 0;
         currentTiltY = 0;
-        heroImage.style.transform  = '';
-        heroImage.style.boxShadow  = '';
-        if (imgEl) imgEl.style.transform = '';
+        heroImage.style.transform = '';
+        heroImage.style.boxShadow = '';
       }
     }
 
