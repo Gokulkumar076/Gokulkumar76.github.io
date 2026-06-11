@@ -9,30 +9,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet" />
   <style>
+    /* ── CUSTOM CURSOR: only the glowing trail, no extra dot ── */
     * { cursor: none !important; }
-    #cursor-dot {
-      position: fixed;
-      width: 6px; height: 6px;
-      background: #f5a623;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 99999;
-      left: -100px; top: -100px;
-      transform: translate(-50%, -50%);
-      transition: width 0.12s ease, height 0.12s ease;
-    }
-    #cursor-dot.hovering { width: 10px; height: 10px; }
-    #cursor-dot.clicking { width: 3px; height: 3px; }
     @media (max-width: 768px) {
       * { cursor: auto !important; }
-      #cursor-dot { display: none !important; }
     }
   </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
-<div id="cursor-dot"></div>
 
 <!-- NAVBAR -->
 <nav class="navbar">
@@ -66,6 +52,8 @@
 
 <!-- ABOUT -->
 <section class="about" id="about">
+  <!-- Animated background: slow drifting orb mesh -->
+  <canvas class="about-bg-canvas" id="about-bg"></canvas>
   <div class="section-container">
     <div class="section-header">
       <span class="section-number">01</span>
@@ -75,7 +63,7 @@
     <div class="about-grid">
       <div class="about-text">
         <p class="about-p">I'm a third-year B.Tech Computer Science and Engineering student with a genuine passion for building things with code. I enjoy learning how technology works and turning ideas into working projects.</p>
-        <p class="about-p">When I'm not coding, you'll find me listening to Tamil music, exploring Japanese culture, or picking up new skills. I'm actively looking for internship opportunities where I can contribute and grow.</p>
+        <p class="about-p">When I'm not coding, you'll find me listening to Tamil music, exploring Japanese culture, or picking up new skills.</p>
       </div>
       <div class="about-cards">
         <div class="about-card" data-delay="0">
@@ -89,14 +77,14 @@
           <div class="about-card-value">3rd Year</div>
         </div>
         <div class="about-card" data-delay="2">
-          <div class="about-card-icon">🔍</div>
-          <div class="about-card-label">Looking For</div>
-          <div class="about-card-value">Internships</div>
+          <div class="about-card-icon">💡</div>
+          <div class="about-card-label">Focus</div>
+          <div class="about-card-value">Full Stack Dev</div>
         </div>
         <div class="about-card" data-delay="3">
           <div class="about-card-icon">📍</div>
-          <div class="about-card-label">Status</div>
-          <div class="about-card-value">Open to Work</div>
+          <div class="about-card-label">Location</div>
+          <div class="about-card-value">Tamil Nadu, India</div>
         </div>
       </div>
     </div>
@@ -106,6 +94,8 @@
 
 <!-- SKILLS -->
 <section class="skills" id="skills">
+  <!-- Animated background: subtle hex grid pulse -->
+  <canvas class="skills-bg-canvas" id="skills-bg"></canvas>
   <div class="section-container">
     <div class="section-header">
       <span class="section-number">02</span>
@@ -157,6 +147,8 @@
 
 <!-- PROJECTS -->
 <section class="projects" id="projects">
+  <!-- Animated background: flowing diagonal lines -->
+  <canvas class="projects-bg-canvas" id="projects-bg"></canvas>
   <div class="section-container">
     <div class="section-header">
       <span class="section-number">03</span>
@@ -232,11 +224,7 @@
     </div>
     <div class="contact-grid">
       <div class="contact-left">
-        <p class="contact-intro">I'm currently open to internship opportunities. Whether you have a question, a project idea, or just want to say hi — my inbox is always open.</p>
-        <div class="contact-availability">
-          <span class="availability-dot"></span>
-          <span>Available for internships</span>
-        </div>
+        <p class="contact-intro">Have a question, a project idea, or just want to say hi? My inbox is always open.</p>
       </div>
       <div class="contact-right">
         <a href="mailto:76gokulkumar@gmail.com" class="contact-item">
@@ -290,14 +278,13 @@
   <p>Designed &amp; built by <span style="color:#f5a623">Gokul Kumar</span> &middot; 2025</p>
 </footer>
 
-<!-- SCROLL REVEAL — triggers EVERY TIME element enters viewport -->
+<!-- SCROLL REVEAL -->
 <script>
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add('visible');
       } else {
-        // Remove so it re-animates every time it enters
         entry.target.classList.remove('visible');
       }
     });
@@ -321,10 +308,9 @@
   });
 </script>
 
-<!-- SECTION ANIMATIONS — re-trigger every scroll -->
+<!-- SECTION ANIMATIONS -->
 <script>
   function initSectionAnimations() {
-    // About cards
     const aboutCards = document.querySelectorAll('.about-card');
     const aboutObs = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -338,7 +324,6 @@
     }, { threshold: 0.2 });
     aboutCards.forEach(c => aboutObs.observe(c));
 
-    // About text paragraphs
     const aboutPs = document.querySelectorAll('.about-p');
     const pObs = new IntersectionObserver((entries) => {
       entries.forEach((entry, i) => {
@@ -351,7 +336,6 @@
     }, { threshold: 0.2 });
     aboutPs.forEach(p => pObs.observe(p));
 
-    // Skill categories
     const skillCats = document.querySelectorAll('.skill-category');
     const skillObs = new IntersectionObserver((entries) => {
       entries.forEach((entry, i) => {
@@ -364,7 +348,6 @@
     }, { threshold: 0.2 });
     skillCats.forEach(s => skillObs.observe(s));
 
-    // Skill tags stagger
     const skillTags = document.querySelectorAll('.skill-tags .tag');
     const tagObs = new IntersectionObserver((entries) => {
       entries.forEach((entry, i) => {
@@ -377,7 +360,6 @@
     }, { threshold: 0.3 });
     skillTags.forEach(t => tagObs.observe(t));
 
-    // Project cards
     const projectCards = document.querySelectorAll('.project-card');
     const projObs = new IntersectionObserver((entries) => {
       entries.forEach((entry, i) => {
@@ -390,7 +372,6 @@
     }, { threshold: 0.1 });
     projectCards.forEach(p => projObs.observe(p));
 
-    // Contact items
     const contactItems = document.querySelectorAll('.contact-item');
     const contactObs = new IntersectionObserver((entries) => {
       entries.forEach((entry, i) => {
@@ -403,7 +384,6 @@
     }, { threshold: 0.2 });
     contactItems.forEach(c => contactObs.observe(c));
 
-    // Section headers
     const sectionHeaders = document.querySelectorAll('.section-header');
     const headerObs = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -416,7 +396,6 @@
     }, { threshold: 0.3 });
     sectionHeaders.forEach(h => headerObs.observe(h));
 
-    // Section bg text
     const bgTexts = document.querySelectorAll('.section-bg-text');
     const bgObs = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -432,8 +411,11 @@
   initSectionAnimations();
 </script>
 
-<!-- BACKGROUND + CURSOR -->
+<!-- ══════════════════════════════════════════
+     MAIN BG CANVAS + CURSOR (trail only, no dot)
+════════════════════════════════════════════ -->
 <script>
+/* ── Main hero background canvas ── */
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
 canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;';
@@ -441,8 +423,7 @@ let W = canvas.width = window.innerWidth;
 let H = canvas.height = window.innerHeight;
 window.addEventListener('resize', () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; });
 
-// Cursor
-const dot = document.getElementById('cursor-dot');
+/* ── Cursor: glowing trail ONLY, no extra dot ── */
 const jc = document.createElement('canvas');
 jc.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99997;';
 document.body.appendChild(jc);
@@ -453,7 +434,7 @@ window.addEventListener('resize', () => { jc.width = window.innerWidth; jc.heigh
 let mX = -200, mY = -200;
 let isMobile = window.innerWidth <= 768;
 window.addEventListener('resize', () => { isMobile = window.innerWidth <= 768; });
-document.addEventListener('mousemove', e => { mX = e.clientX; mY = e.clientY; dot.style.left = mX+'px'; dot.style.top = mY+'px'; });
+document.addEventListener('mousemove', e => { mX = e.clientX; mY = e.clientY; });
 
 const TLEN = 10;
 const trail = Array.from({length: TLEN}, () => ({x:-200,y:-200}));
@@ -476,14 +457,7 @@ function drawJelly() {
 }
 drawJelly();
 
-document.querySelectorAll('a,button,.btn,.hero-image,.project-card,.contact-item,.tag,.nav-logo').forEach(el => {
-  el.addEventListener('mouseenter', () => dot.classList.add('hovering'));
-  el.addEventListener('mouseleave', () => dot.classList.remove('hovering'));
-});
-document.addEventListener('mousedown', () => { dot.classList.add('clicking'); spawnBurst(mX,mY); });
-document.addEventListener('mouseup', () => dot.classList.remove('clicking'));
-
-// Burst
+/* ── Click burst ── */
 const bursts = [];
 function spawnBurst(x,y) {
   for (let i=0;i<10;i++) {
@@ -491,6 +465,7 @@ function spawnBurst(x,y) {
     bursts.push({x,y,vx:Math.cos(a)*(Math.random()*3+1.5),vy:Math.sin(a)*(Math.random()*3+1.5),size:Math.random()*3+1,opacity:1,decay:Math.random()*0.04+0.03});
   }
 }
+document.addEventListener('mousedown', () => spawnBurst(mX,mY));
 function drawBursts() {
   for (let i=bursts.length-1;i>=0;i--) {
     const b=bursts[i]; b.x+=b.vx; b.y+=b.vy; b.opacity-=b.decay; b.size*=0.95;
@@ -500,7 +475,7 @@ function drawBursts() {
   }
 }
 
-// Particles
+/* ── Floating particles ── */
 const particles = [];
 class Particle {
   constructor() { this.reset(true); }
@@ -525,7 +500,7 @@ class Particle {
 }
 for (let i=0;i<80;i++) particles.push(new Particle());
 
-// Grid
+/* ── Grid ── */
 let gridOffset=0;
 function drawGrid() {
   const cW=W/10, rH=H/10;
@@ -535,7 +510,7 @@ function drawGrid() {
   for (let r=-1;r<=11;r++) { const y=r*rH+gridOffset; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
 }
 
-// Shooting stars
+/* ── Shooting stars ── */
 const stars = [];
 class Star {
   constructor() { this.spawn(); }
@@ -576,36 +551,227 @@ function animate() {
 animate();
 </script>
 
-<!-- PROFILE TILT -->
+<!-- ══════════════════════════════════════════
+     SECTION BACKGROUND ANIMATIONS
+     About    → drifting soft orbs
+     Skills   → pulsing dot matrix
+     Projects → flowing diagonal light streaks
+════════════════════════════════════════════ -->
+<script>
+/* ── Utility: resize canvas to match its parent section ── */
+function fitCanvas(canvas) {
+  const section = canvas.parentElement;
+  canvas.width = section.offsetWidth;
+  canvas.height = section.offsetHeight;
+}
+
+/* ════════════════════════
+   ABOUT — Drifting soft orbs
+════════════════════════ */
+(function() {
+  const c = document.getElementById('about-bg');
+  if (!c) return;
+  const cx = c.getContext('2d');
+  fitCanvas(c);
+  window.addEventListener('resize', () => fitCanvas(c));
+
+  const NUM = 6;
+  const orbs = Array.from({length: NUM}, (_, i) => ({
+    x: Math.random() * c.width,
+    y: Math.random() * c.height,
+    r: 120 + Math.random() * 180,
+    vx: (Math.random() - 0.5) * 0.18,
+    vy: (Math.random() - 0.5) * 0.18,
+    phase: Math.random() * Math.PI * 2,
+    phaseSpeed: 0.003 + Math.random() * 0.004,
+    // alternate between amber and a deep blue-purple for depth contrast
+    hue: i % 2 === 0 ? '245,166,35' : '130,80,255',
+    baseAlpha: 0.04 + Math.random() * 0.04,
+  }));
+
+  function drawAboutBg() {
+    cx.clearRect(0, 0, c.width, c.height);
+    orbs.forEach(o => {
+      o.x += o.vx; o.y += o.vy; o.phase += o.phaseSpeed;
+      const pulse = 0.7 + 0.3 * Math.sin(o.phase);
+      const alpha = o.baseAlpha * pulse;
+      // Wrap
+      if (o.x < -o.r) o.x = c.width + o.r;
+      if (o.x > c.width + o.r) o.x = -o.r;
+      if (o.y < -o.r) o.y = c.height + o.r;
+      if (o.y > c.height + o.r) o.y = -o.r;
+
+      const g = cx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r * pulse);
+      g.addColorStop(0, `rgba(${o.hue},${alpha})`);
+      g.addColorStop(0.5, `rgba(${o.hue},${alpha * 0.4})`);
+      g.addColorStop(1, `rgba(${o.hue},0)`);
+      cx.fillStyle = g;
+      cx.beginPath();
+      cx.arc(o.x, o.y, o.r * pulse, 0, Math.PI * 2);
+      cx.fill();
+    });
+    requestAnimationFrame(drawAboutBg);
+  }
+  drawAboutBg();
+})();
+
+/* ════════════════════════
+   SKILLS — Pulsing dot matrix
+════════════════════════ */
+(function() {
+  const c = document.getElementById('skills-bg');
+  if (!c) return;
+  const cx = c.getContext('2d');
+  fitCanvas(c);
+  window.addEventListener('resize', () => { fitCanvas(c); buildDots(); });
+
+  const SPACING = 44;
+  let dots = [];
+  let t = 0;
+
+  function buildDots() {
+    dots = [];
+    const cols = Math.ceil(c.width / SPACING) + 1;
+    const rows = Math.ceil(c.height / SPACING) + 1;
+    for (let r = 0; r < rows; r++) {
+      for (let col = 0; col < cols; col++) {
+        dots.push({
+          x: col * SPACING,
+          y: r * SPACING,
+          offset: (col + r) * 0.38,
+        });
+      }
+    }
+  }
+  buildDots();
+
+  function drawSkillsBg() {
+    cx.clearRect(0, 0, c.width, c.height);
+    t += 0.012;
+    dots.forEach(d => {
+      const wave = Math.sin(t + d.offset) * 0.5 + 0.5; // 0→1
+      const size = 1 + wave * 1.4;
+      const alpha = 0.04 + wave * 0.09;
+      cx.beginPath();
+      cx.arc(d.x, d.y, size, 0, Math.PI * 2);
+      cx.fillStyle = `rgba(245,166,35,${alpha})`;
+      cx.fill();
+    });
+    requestAnimationFrame(drawSkillsBg);
+  }
+  drawSkillsBg();
+})();
+
+/* ════════════════════════
+   PROJECTS — Flowing diagonal light streaks
+════════════════════════ */
+(function() {
+  const c = document.getElementById('projects-bg');
+  if (!c) return;
+  const cx = c.getContext('2d');
+  fitCanvas(c);
+  window.addEventListener('resize', () => fitCanvas(c));
+
+  const NUM_LINES = 8;
+  const lines = Array.from({length: NUM_LINES}, (_, i) => ({
+    // stagger across width
+    x: (c.width / NUM_LINES) * i - 60,
+    speed: 0.25 + Math.random() * 0.3,
+    len: 80 + Math.random() * 120,
+    alpha: 0.05 + Math.random() * 0.06,
+    phase: Math.random() * Math.PI * 2,
+    phaseSpeed: 0.008 + Math.random() * 0.006,
+  }));
+
+  const ANGLE = Math.PI / 5; // ~36°
+  const dx = Math.cos(ANGLE);
+  const dy = Math.sin(ANGLE);
+  const reset = (l) => {
+    l.x = -l.len * dx - 40 + Math.random() * c.width * 0.6;
+    l.y = -l.len * dy - 40;
+    l.speed = 0.25 + Math.random() * 0.3;
+    l.len = 80 + Math.random() * 120;
+    l.alpha = 0.05 + Math.random() * 0.06;
+  };
+
+  function drawProjectsBg() {
+    cx.clearRect(0, 0, c.width, c.height);
+    lines.forEach(l => {
+      l.x += dx * l.speed;
+      l.y += dy * l.speed;
+      l.phase += l.phaseSpeed;
+      const pulse = 0.6 + 0.4 * Math.sin(l.phase);
+      const alpha = l.alpha * pulse;
+
+      if (l.x > c.width + 100 || l.y > c.height + 100) reset(l);
+
+      const x0 = l.x - dx * l.len;
+      const y0 = l.y - dy * l.len;
+      const g = cx.createLinearGradient(x0, y0, l.x, l.y);
+      g.addColorStop(0, `rgba(245,166,35,0)`);
+      g.addColorStop(0.5, `rgba(245,166,35,${alpha * 0.6})`);
+      g.addColorStop(1, `rgba(245,166,35,${alpha})`);
+      cx.beginPath();
+      cx.moveTo(x0, y0);
+      cx.lineTo(l.x, l.y);
+      cx.strokeStyle = g;
+      cx.lineWidth = 1;
+      cx.stroke();
+    });
+    requestAnimationFrame(drawProjectsBg);
+  }
+  drawProjectsBg();
+})();
+</script>
+
+<!-- ══════════════════════════════════════════
+     PROFILE TILT — glow only, NO black ring
+════════════════════════════════════════════ -->
 <script>
   const heroImage = document.querySelector('.hero-image');
   let cX=0,cY=0,tX=0,tY=0,af;
+
   function animTilt() {
     cX+=(tX-cX)*0.06; cY+=(tY-cY)*0.06;
-    const amt=Math.sqrt(cX**2+cY**2), gs=20+amt*3, go=0.3+amt*0.02;
-    const gx=-cY*2, gy=cX*2;
-    heroImage.style.transform=`perspective(700px) rotateX(${cX}deg) rotateY(${cY}deg) scale(1.05)`;
-    heroImage.style.boxShadow=`${gx}px ${gy}px ${gs}px rgba(245,166,35,${go}),0 0 ${gs*2}px rgba(245,166,35,${go*0.4}),0 0 ${gs*3}px rgba(245,166,35,${go*0.15})`;
-    af=requestAnimationFrame(animTilt);
+    // Only apply gold glow — never a solid dark shadow that would appear as a ring
+    const amt = Math.sqrt(cX**2 + cY**2);
+    const glow = Math.min(amt * 2.5, 30);
+    const glowAlpha = Math.min(0.15 + amt * 0.025, 0.55);
+    heroImage.style.transform = `perspective(700px) rotateX(${cX}deg) rotateY(${cY}deg) scale(1.03)`;
+    heroImage.style.boxShadow = `0 0 ${glow}px rgba(245,166,35,${glowAlpha}), 0 0 ${glow*2}px rgba(245,166,35,${glowAlpha*0.4})`;
+    af = requestAnimationFrame(animTilt);
   }
+
   heroImage.addEventListener('mouseenter', () => { cancelAnimationFrame(af); animTilt(); });
   heroImage.addEventListener('mousemove', e => {
-    const r=heroImage.getBoundingClientRect();
-    tX=((e.clientY-r.top-r.height/2)/(r.height/2))*18;
-    tY=-((e.clientX-r.left-r.width/2)/(r.width/2))*18;
+    const r = heroImage.getBoundingClientRect();
+    tX = ((e.clientY - r.top - r.height/2) / (r.height/2)) * 14;
+    tY = -((e.clientX - r.left - r.width/2) / (r.width/2)) * 14;
   });
   heroImage.addEventListener('mouseleave', () => {
     tX=0; tY=0; cancelAnimationFrame(af);
     function reset() {
       cX*=0.88; cY*=0.88;
-      const amt=Math.sqrt(cX**2+cY**2);
-      heroImage.style.transform=`perspective(700px) rotateX(${cX}deg) rotateY(${cY}deg) scale(1)`;
-      heroImage.style.boxShadow=amt>0.05?`0 0 ${amt*3}px rgba(245,166,35,${amt*0.01})`:'none';
-      if (amt>0.05) { af=requestAnimationFrame(reset); } else { cX=0;cY=0; heroImage.style.transform=''; heroImage.style.boxShadow='none'; }
+      const amt = Math.sqrt(cX**2 + cY**2);
+      heroImage.style.transform = `perspective(700px) rotateX(${cX}deg) rotateY(${cY}deg) scale(1)`;
+      // Fade glow out cleanly — never expose a dark fallback
+      if (amt > 0.05) {
+        const alpha = Math.min(amt * 0.02, 0.15);
+        heroImage.style.boxShadow = `0 0 ${amt*3}px rgba(245,166,35,${alpha})`;
+        af = requestAnimationFrame(reset);
+      } else {
+        cX=0; cY=0;
+        heroImage.style.transform = '';
+        heroImage.style.boxShadow = 'none';
+      }
     }
     reset();
   });
-  heroImage.addEventListener('click', () => { heroImage.classList.add('clicked'); setTimeout(()=>heroImage.classList.remove('clicked'),1200); });
+
+  heroImage.addEventListener('click', () => {
+    heroImage.classList.add('clicked');
+    setTimeout(() => heroImage.classList.remove('clicked'), 1200);
+  });
 </script>
 
 </body>
