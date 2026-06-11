@@ -315,6 +315,8 @@ ul {
   margin: 0 auto;
   padding: 100px 24px 60px;
   gap: 60px;
+  flex-direction: row;
+  text-align: left;
 }
 
 .hero-content {
@@ -699,10 +701,9 @@ ul {
   font-family: var(--font-body);
 }
 
-/* =========================================
-   RESPONSIVE — Mobile
-   ========================================= */
 @media (max-width: 768px) {
+
+  /* ── NAVBAR ── */
   .navbar {
     top: 0;
     left: 0;
@@ -719,57 +720,84 @@ ul {
     border-top: none;
   }
 
-  .nav-logo {
-    font-size: 16px;
-  }
+  .nav-logo { font-size: 16px; }
 
-  .nav-links {
-    gap: 0px;
-  }
+  .nav-links { gap: 0px; }
 
   .nav-links li a {
     padding: 6px 8px;
     font-size: 11px;
     letter-spacing: 0;
   }
-}
 
-  .hero-subtitle { margin-left: auto; margin-right: auto; }
+  /* ── HERO ── */
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    padding-top: 120px;
+    gap: 40px;
+    justify-content: center;
+  }
+
+  .hero-image {
+    width: 220px;
+    height: 220px;
+    order: -1;
+  }
+
+  .hero-content { max-width: 100%; }
+
+  .hero-subtitle {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .hero-buttons { justify-content: center; }
-  .hero-image { width: 200px; height: 200px; order: -1; }
 
-  .section-container { padding: 60px 20px; }
-  .skills-grid { grid-template-columns: 1fr; }
-  .projects-grid { grid-template-columns: 1fr; }
+  /* ── SECTIONS ── */
+  .section-container {
+    padding: 60px 20px;
+  }
 
-  .detail-item { flex-direction: column; gap: 4px; }
-  .contact-item { max-width: 100%; }
-}
-/* Profile hover glow — always visible on hover */
-.hero-image:hover {
-  box-shadow:
-    0 0 0 3px rgba(245, 166, 35, 0.3),
-    0 0 30px rgba(245, 166, 35, 0.4),
-    0 0 60px rgba(245, 166, 35, 0.15);
-  border-color: rgba(245, 166, 35, 0.6);
-}
+  /* ── SKILLS ── */
+  .skills-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 
-/* Profile click glow — triggers on click */
-.hero-image.clicked {
-  box-shadow:
-    0 0 0 5px rgba(245, 166, 35, 0.5),
-    0 0 50px rgba(245, 166, 35, 0.7),
-    0 0 100px rgba(245, 166, 35, 0.3);
-  border-color: #f5a623;
-}
-.hero-image {
-  flex-shrink: 0;
-  width: 340px;
-  height: 340px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 2px solid var(--color-border);
-  background: var(--color-surface);
-  position: relative;
-  transition: transform 0.15s ease; /* ← add this line */
+  /* ── PROJECTS ── */
+  .projects-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* ── ABOUT ── */
+  .about-details { margin-top: 24px; }
+
+  .detail-item {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* ── CONTACT ── */
+  .contact-item {
+    max-width: 100%;
+  }
+
+  .contact-item span:last-child {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  /* ── SECTION TITLES ── */
+  .section-title {
+    font-size: 28px;
+  }
+
+  /* ── HERO NAME ── */
+  .hero-name {
+    font-size: clamp(42px, 12vw, 64px);
+  }
 }
