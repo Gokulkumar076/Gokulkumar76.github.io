@@ -645,17 +645,10 @@ animate();
     const tiltAmount  = Math.sqrt(currentTiltX ** 2 + currentTiltY ** 2);
     const glowSize    = 20 + tiltAmount * 3;
     const glowOpacity = 0.3 + tiltAmount * 0.02;
+    const glowX       = -currentTiltY * 2;
+    const glowY       =  currentTiltX * 2;
 
-    heroImage.style.transform = `
-      perspective(700px)
-      rotateX(${currentTiltX}deg)
-      rotateY(${currentTiltY}deg)
-      scale(1.05)
-    `;
-
-    // Glow shifts direction with tilt
-    const glowX = -currentTiltY * 2;
-    const glowY =  currentTiltX * 2;
+    heroImage.style.transform = `perspective(700px) rotateX(${currentTiltX}deg) rotateY(${currentTiltY}deg) scale(1.05)`;
     heroImage.style.boxShadow = `
       ${glowX}px ${glowY}px ${glowSize}px rgba(245, 166, 35, ${glowOpacity}),
       0px 0px ${glowSize * 2}px rgba(245, 166, 35, ${glowOpacity * 0.4}),
@@ -674,45 +667,36 @@ animate();
     const rect    = heroImage.getBoundingClientRect();
     const centerX = rect.left + rect.width  / 2;
     const centerY = rect.top  + rect.height / 2;
-    const deltaX  = e.clientX - centerX;
-    const deltaY  = e.clientY - centerY;
-
-    targetTiltX =  (deltaY / (rect.height / 2)) * 18;
-    targetTiltY = -(deltaX / (rect.width  / 2)) * 18;
+    targetTiltX   =  ((e.clientY - centerY) / (rect.height / 2)) * 18;
+    targetTiltY   = -((e.clientX - centerX) / (rect.width  / 2)) * 18;
   });
 
   heroImage.addEventListener('mouseleave', () => {
     targetTiltX = 0;
     targetTiltY = 0;
+    cancelAnimationFrame(animFrame);
 
     function resetLoop() {
-      currentTiltX += (0 - currentTiltX) * 0.08;
-      currentTiltY += (0 - currentTiltY) * 0.08;
+      currentTiltX *= 0.88;
+      currentTiltY *= 0.88;
 
-      const tiltAmount  = Math.sqrt(currentTiltX ** 2 + currentTiltY ** 2);
-      const glowOpacity = Math.max(0, tiltAmount * 0.02);
+      const tiltAmount = Math.sqrt(currentTiltX ** 2 + currentTiltY ** 2);
 
-      heroImage.style.transform = `
-        perspective(700px)
-        rotateX(${currentTiltX}deg)
-        rotateY(${currentTiltY}deg)
-        scale(1)
-      `;
-      heroImage.style.boxShadow = `
-        0 0 ${tiltAmount * 3}px rgba(245, 166, 35, ${glowOpacity})
-      `;
+      heroImage.style.transform = `perspective(700px) rotateX(${currentTiltX}deg) rotateY(${currentTiltY}deg) scale(1)`;
+      heroImage.style.boxShadow = tiltAmount > 0.05
+        ? `0 0 ${tiltAmount * 3}px rgba(245, 166, 35, ${tiltAmount * 0.01})`
+        : 'none';
 
       if (tiltAmount > 0.05) {
         animFrame = requestAnimationFrame(resetLoop);
       } else {
+        // Fully reset everything
         currentTiltX = 0;
         currentTiltY = 0;
         heroImage.style.transform = '';
-        heroImage.style.boxShadow = '';
+        heroImage.style.boxShadow = 'none';
       }
     }
-
-    cancelAnimationFrame(animFrame);
     resetLoop();
   });
 </script>
