@@ -62,9 +62,7 @@ ul {
 }
 
 /* =========================================
-   SCROLL REVEAL ANIMATION
-   Elements start invisible and slide up
-   JS will add .visible class to trigger them
+   SCROLL REVEAL
    ========================================= */
 .reveal {
   opacity: 0;
@@ -137,7 +135,7 @@ ul {
 }
 
 /* =========================================
-   NAVIGATION BAR — redesigned
+   NAVIGATION BAR
    ========================================= */
 .navbar {
   position: fixed;
@@ -157,7 +155,6 @@ ul {
   width: fit-content;
   min-width: 580px;
   gap: 40px;
-  /* Soft amber glow around the pill */
   box-shadow:
     0 0 0 1px rgba(245, 166, 35, 0.06),
     0 8px 32px rgba(0, 0, 0, 0.4),
@@ -207,14 +204,12 @@ ul {
   background: rgba(245, 166, 35, 0.08);
 }
 
-/* Active amber pill highlight */
 .nav-links li a.active {
   color: #f5a623;
   background: rgba(245, 166, 35, 0.12);
   box-shadow: 0 0 12px rgba(245, 166, 35, 0.15);
 }
 
-/* Fade blur edges on both sides of the navbar */
 .navbar::before,
 .navbar::after {
   content: '';
@@ -229,24 +224,16 @@ ul {
 
 .navbar::before {
   left: 0;
-  background: linear-gradient(
-    to right,
-    rgba(15, 15, 15, 0.5),
-    transparent
-  );
+  background: linear-gradient(to right, rgba(15,15,15,0.5), transparent);
 }
 
 .navbar::after {
   right: 0;
-  background: linear-gradient(
-    to left,
-    rgba(15, 15, 15, 0.5),
-    transparent
-  );
+  background: linear-gradient(to left, rgba(15,15,15,0.5), transparent);
 }
 
 /* =========================================
-   BUTTONS — with glow effect
+   BUTTONS
    ========================================= */
 .btn {
   display: inline-block;
@@ -262,7 +249,6 @@ ul {
   position: relative;
 }
 
-/* Primary button — amber filled with glow */
 .btn-primary {
   background: var(--color-accent);
   color: #0a0a0a;
@@ -285,12 +271,10 @@ ul {
   box-shadow: 0 0 10px var(--color-accent-glow);
 }
 
-/* Secondary button — outlined with amber glow on hover */
 .btn-secondary {
   background: transparent;
   color: var(--color-text-secondary);
   border: 1.5px solid var(--color-border-hover);
-  box-shadow: 0 0 0 rgba(245, 166, 35, 0);
 }
 
 .btn-secondary:hover {
@@ -308,6 +292,7 @@ ul {
    ========================================= */
 .hero {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   min-height: 100vh;
@@ -315,7 +300,6 @@ ul {
   margin: 0 auto;
   padding: 100px 24px 60px;
   gap: 60px;
-  flex-direction: row;
   text-align: left;
 }
 
@@ -365,7 +349,7 @@ ul {
   flex-wrap: wrap;
 }
 
-/* Hero image circle */
+/* Hero image — NO hover CSS glow, tilt JS handles it */
 .hero-image {
   flex-shrink: 0;
   width: 340px;
@@ -375,40 +359,22 @@ ul {
   border: 2px solid var(--color-border);
   background: var(--color-surface);
   position: relative;
-  transition: all 0.4s ease;
-}
-
-.hero-image.clicked {
-  box-shadow:
-    0 0 0 4px rgba(245, 166, 35, 0.4),
-    0 0 40px rgba(245, 166, 35, 0.5),
-    0 0 80px rgba(245, 166, 35, 0.2);
-  border-color: #f5a623;
-}
-
-/* Amber glow ring on hover */
-.hero-image::before {
-  content: '';
-  position: absolute;
-  inset: -3px;
-  border-radius: 50%;
-  background: transparent;
-  border: 2px solid transparent;
-  box-shadow: 0 0 0 rgba(245,166,35,0);
-  transition: all 0.4s ease;
-  z-index: 1;
-  pointer-events: none;
+  transition: border-color 0.4s ease;
 }
 
 .hero-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
 }
 
-.hero-image:hover img {
-  transform: scale(1.04);
+/* Click glow */
+.hero-image.clicked {
+  box-shadow:
+    0 0 0 4px rgba(245, 166, 35, 0.4),
+    0 0 40px rgba(245, 166, 35, 0.5),
+    0 0 80px rgba(245, 166, 35, 0.2);
+  border-color: #f5a623;
 }
 
 /* =========================================
@@ -526,13 +492,10 @@ ul {
   overflow: hidden;
 }
 
-/* Amber top border accent that grows on hover */
 .project-card::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   height: 2px;
   background: var(--color-accent);
   transform: scaleX(0);
@@ -540,9 +503,7 @@ ul {
   transition: transform 0.4s ease;
 }
 
-.project-card:hover::before {
-  transform: scaleX(1);
-}
+.project-card:hover::before { transform: scaleX(1); }
 
 .project-card:hover {
   border-color: #2a2a2a;
@@ -610,9 +571,7 @@ ul {
   font-family: var(--font-heading);
 }
 
-.project-link:hover {
-  color: var(--color-accent);
-}
+.project-link:hover { color: var(--color-accent); }
 
 /* =========================================
    CONTACT SECTION
@@ -695,9 +654,11 @@ ul {
   font-family: var(--font-body);
 }
 
+/* =========================================
+   RESPONSIVE — MOBILE
+   ========================================= */
 @media (max-width: 768px) {
 
-  /* ── NAVBAR ── */
   .navbar {
     top: 0;
     left: 0;
@@ -715,8 +676,7 @@ ul {
   }
 
   .nav-logo { font-size: 16px; }
-
-  .nav-links { gap: 0px; }
+  .nav-links { gap: 0; }
 
   .nav-links li a {
     padding: 6px 8px;
@@ -724,7 +684,6 @@ ul {
     letter-spacing: 0;
   }
 
-  /* ── HERO ── */
   .hero {
     flex-direction: column;
     text-align: center;
@@ -748,24 +707,18 @@ ul {
 
   .hero-buttons { justify-content: center; }
 
-  /* ── SECTIONS ── */
-  .section-container {
-    padding: 60px 20px;
-  }
+  .section-container { padding: 60px 20px; }
 
-  /* ── SKILLS ── */
   .skills-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
 
-  /* ── PROJECTS ── */
   .projects-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
 
-  /* ── ABOUT ── */
   .about-details { margin-top: 24px; }
 
   .detail-item {
@@ -773,25 +726,9 @@ ul {
     gap: 4px;
   }
 
-  /* ── CONTACT ── */
-  .contact-item {
-    max-width: 100%;
-  }
+  .contact-item { max-width: 100%; }
 
-  .contact-item span:last-child {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
-  }
+  .section-title { font-size: 28px; }
 
-  /* ── SECTION TITLES ── */
-  .section-title {
-    font-size: 28px;
-  }
-
-  /* ── HERO NAME ── */
-  .hero-name {
-    font-size: clamp(42px, 12vw, 64px);
-  }
+  .hero-name { font-size: clamp(42px, 12vw, 64px); }
 }
