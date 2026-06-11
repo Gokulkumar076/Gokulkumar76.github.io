@@ -42,6 +42,7 @@ body {
   color: var(--color-text-primary);
   font-size: 16px;
   line-height: 1.7;
+  font-weight: 500;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -192,7 +193,7 @@ ul {
 .nav-links li a {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.5);
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: 0.03em;
   padding: 7px 16px;
   border-radius: 999px;
