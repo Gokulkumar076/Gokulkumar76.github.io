@@ -216,10 +216,11 @@ ul { list-style:none; }
   min-height: 100vh;
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 100px 40px 60px;
+  padding: 20px 40px;
   gap: 60px;
   text-align: left;
 }
+
 .hero-content { max-width: 520px; }
 .hero-greeting {
   font-size: 12px;
