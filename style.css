@@ -274,7 +274,7 @@ ul { list-style:none; }
 .hero-image-ring {
   position: absolute;
   inset: 0px;
-  border-radius: 80%;
+  border-radius: 50%;
   border: 2px solid rgba(245,166,35,0.5);
   box-shadow: 0 0 20px rgba(245,166,35,0.25), 0 0 40px rgba(245,166,35,0.1);
   animation: ringPulse 3s ease-in-out infinite;
