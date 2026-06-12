@@ -612,7 +612,11 @@ section:not(.hero) {
 }
 .strip-svg { width:14px; height:14px; flex-shrink:0; opacity:0.7; transition: opacity 0.2s ease; }
 .logo-strip-item:hover .strip-svg { opacity: 1; }
-.strip-mysql { color:#00758f; fill:#00758f; }
+.strip-mysql {
+  color: #00b4d8;
+  fill: #00b4d8;
+  filter: drop-shadow(0 0 4px rgba(0,180,216,0.5));
+}
 .strip-json  { color:#cbcb41; fill:#cbcb41; }
 .strip-bash  { color:#89e051; fill:#89e051; }
 .strip-oop2  { color:var(--accent); stroke:var(--accent); fill:none; }
