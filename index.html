@@ -884,5 +884,44 @@ document.querySelectorAll('a,button,.btn,.hero-image,.project-card,.contact-item
 });
 </script>
 
+<!-- ════════════════════════════════════════════
+  PROFILE TILT — directional glow follows cursor
+════════════════════════════════════════════ -->
+<script>
+const heroImage = document.querySelector('.hero-image');
+let cX=0,cY=0,tX=0,tY=0,af;
+
+function animTilt() {
+  cX+=(tX-cX)*0.06; cY+=(tY-cY)*0.06;
+  const amt=Math.sqrt(cX**2+cY**2);
+  const glow=Math.min(amt*2.5,30);
+  const glowAlpha=Math.min(0.15+amt*0.025,0.55);
+  const glowX=-cY*2, glowY=cX*2;
+  heroImage.style.transform=`perspective(700px) rotateX(${cX}deg) rotateY(${cY}deg) scale(1.03)`;
+  heroImage.style.boxShadow=`${glowX}px ${glowY}px ${glow}px rgba(245,166,35,${glowAlpha}),0 0 ${glow*2}px rgba(245,166,35,${glowAlpha*0.4})`;
+  af=requestAnimationFrame(animTilt);
+}
+heroImage.addEventListener('mouseenter', () => { cancelAnimationFrame(af); animTilt(); });
+heroImage.addEventListener('mousemove', e => {
+  const r=heroImage.getBoundingClientRect();
+  tX=((e.clientY-r.top-r.height/2)/(r.height/2))*14;
+  tY=-((e.clientX-r.left-r.width/2)/(r.width/2))*14;
+});
+heroImage.addEventListener('mouseleave', () => {
+  tX=0; tY=0; cancelAnimationFrame(af);
+  function reset() {
+    cX*=0.88; cY*=0.88;
+    const amt=Math.sqrt(cX**2+cY**2);
+    heroImage.style.transform=`perspective(700px) rotateX(${cX}deg) rotateY(${cY}deg) scale(1)`;
+    if(amt>0.05) {
+      heroImage.style.boxShadow=`0 0 ${amt*3}px rgba(245,166,35,${Math.min(amt*0.02,0.15)})`;
+      af=requestAnimationFrame(reset);
+    } else { cX=0;cY=0; heroImage.style.transform=''; heroImage.style.boxShadow='none'; }
+  }
+  reset();
+});
+heroImage.addEventListener('click', () => { heroImage.classList.add('clicked'); setTimeout(()=>heroImage.classList.remove('clicked'),1200); });
+</script>
+
 </body>
 </html>
