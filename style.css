@@ -273,7 +273,7 @@ ul { list-style:none; }
 /* Simple pulsing amber ring — pure border + box-shadow, no mask/conic */
 .hero-image-ring {
   position: absolute;
-  inset: -4px;
+  inset: 0px;
   border-radius: 50%;
   border: 2px solid rgba(245,166,35,0.5);
   box-shadow: 0 0 20px rgba(245,166,35,0.25), 0 0 40px rgba(245,166,35,0.1);
