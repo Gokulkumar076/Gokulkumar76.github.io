@@ -255,8 +255,8 @@ ul { list-style:none; }
 .hero-buttons { display:flex; gap:14px; flex-wrap:wrap; }
 
 /* ══════════════════════════════════════════════
-   HERO IMAGE — amber-only, no black ring
-   Directional glow reacts to tilt
+   HERO IMAGE — amber ring only, no black ring
+   Smooth lerp tilt + dynamic directional glow (JS)
 ══════════════════════════════════════════════ */
 .hero-image {
   flex-shrink: 0;
@@ -265,99 +265,28 @@ ul { list-style:none; }
   border-radius: 50%;
   overflow: visible;
   position: relative;
+  background: transparent;
   outline: none;
-  /* NO border — ring is handled purely via pseudo-element */
   border: none;
-  /* Smooth entrance */
-  transition:
-    transform 0.08s linear,
-    filter 0.35s ease;
-  will-change: transform, filter;
 }
 
-/* Proximity approach glow — faint, always present, intensifies on hover */
-.hero-image::after {
-  content: '';
-  position: absolute;
-  inset: -20px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at var(--gx, 50%) var(--gy, 50%),
-    rgba(245,166,35,0.22) 0%,
-    rgba(245,166,35,0.08) 40%,
-    transparent 70%
-  );
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-.hero-image.img-near::after   { opacity: 0.6; }
-.hero-image.img-hover::after  { opacity: 1; }
-
-/* The amber accent ring — only element, no black */
+/* Simple pulsing amber ring — pure border + box-shadow, no mask/conic */
 .hero-image-ring {
   position: absolute;
   inset: -4px;
   border-radius: 50%;
-  /* Directional shimmer driven by CSS vars set in JS */
-  background: conic-gradient(
-    from calc(var(--ring-angle, 0deg) - 30deg),
-    rgba(245,166,35,0.0)   0deg,
-    rgba(245,166,35,0.9)  60deg,
-    rgba(255,180,50,1.0)  90deg,
-    rgba(245,166,35,0.9) 120deg,
-    rgba(245,166,35,0.0) 180deg,
-    rgba(245,166,35,0.0) 360deg
-  );
-  /* Mask to ring shape — eliminates inner fill (no black disk) */
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), black calc(100% - 2.5px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), black calc(100% - 2.5px));
+  border: 2px solid rgba(245,166,35,0.5);
+  box-shadow: 0 0 20px rgba(245,166,35,0.25), 0 0 40px rgba(245,166,35,0.1);
+  animation: ringPulse 3s ease-in-out infinite;
   pointer-events: none;
   z-index: 2;
-  opacity: 0.55;
-  transition: opacity 0.5s ease;
-  /* Base idle pulse */
-  animation: ringIdlePulse 3.5s ease-in-out infinite;
+}
+@keyframes ringPulse {
+  0%,100% { box-shadow:0 0 20px rgba(245,166,35,0.25),0 0 40px rgba(245,166,35,0.1); border-color:rgba(245,166,35,0.5); }
+  50%      { box-shadow:0 0 32px rgba(245,166,35,0.55),0 0 64px rgba(245,166,35,0.22); border-color:rgba(245,166,35,0.9); }
 }
 
-/* Outer diffuse glow ring layer */
-.hero-image-ring::before {
-  content: '';
-  position: absolute;
-  inset: -8px;
-  border-radius: 50%;
-  background: transparent;
-  /* Directional outer bloom */
-  box-shadow:
-    calc(var(--glow-dx, 0px)) calc(var(--glow-dy, 0px)) 32px rgba(245,166,35,0.18),
-    0 0 60px rgba(245,166,35,0.06);
-  transition:
-    box-shadow 0.18s ease,
-    opacity 0.35s ease;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.hero-image.img-hover .hero-image-ring {
-  opacity: 1;
-  animation: none; /* freeze idle pulse on hover — tilt takes over */
-}
-.hero-image.img-hover .hero-image-ring::before {
-  opacity: 1;
-}
-.hero-image.img-near .hero-image-ring {
-  opacity: 0.75;
-}
-
-@keyframes ringIdlePulse {
-  0%,100% { opacity: 0.45; }
-  50%      { opacity: 0.80; }
-}
-
-/* Profile photo itself — clean circle, no borders.
-   mix-blend-mode: screen makes the baked-in black
-   background in the image file completely invisible. */
+/* Profile photo — clean circle, no blend modes */
 .hero-image img {
   width: 360px;
   height: 360px;
@@ -365,27 +294,19 @@ ul { list-style:none; }
   border-radius: 50%;
   display: block;
   position: relative;
-  mix-blend-mode: screen;
   z-index: 1;
   outline: none;
   border: none;
-  /* Subtle inner vignette via inset shadow for depth */
-  box-shadow: inset 0 0 0 1px rgba(245,166,35,0.08);
-  transition: box-shadow 0.35s ease;
-}
-.hero-image.img-hover img {
-  box-shadow: inset 0 0 0 1px rgba(245,166,35,0.18);
 }
 
-/* Click burst state */
+/* Click — brief extra burst on the ring */
 .hero-image.clicked .hero-image-ring {
-  opacity: 1;
-  animation: ringClickBurst 1.1s ease-out forwards;
-}
-@keyframes ringClickBurst {
-  0%   { opacity: 1; }
-  20%  { opacity: 1; }
-  100% { opacity: 0.55; }
+  box-shadow:
+    0 0 0 4px rgba(245,166,35,0.4),
+    0 0 50px rgba(245,166,35,0.7),
+    0 0 100px rgba(245,166,35,0.3);
+  border-color: #f5a623;
+  animation: none;
 }
 
 /* ══════════════════════════════════════════════
