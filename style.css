@@ -355,7 +355,9 @@ ul { list-style:none; }
   50%      { opacity: 0.80; }
 }
 
-/* Profile photo itself — clean circle, no borders */
+/* Profile photo itself — clean circle, no borders.
+   mix-blend-mode: screen makes the baked-in black
+   background in the image file completely invisible. */
 .hero-image img {
   width: 360px;
   height: 360px;
@@ -363,6 +365,7 @@ ul { list-style:none; }
   border-radius: 50%;
   display: block;
   position: relative;
+  mix-blend-mode: screen;
   z-index: 1;
   outline: none;
   border: none;
