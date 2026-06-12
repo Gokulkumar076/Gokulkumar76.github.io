@@ -319,7 +319,6 @@ initSectionAnimations();
 
 <!-- ════════════════════════════════════════════
   GLOBAL BACKGROUND — deep nebula + particles + grid + shooting stars
-  (unchanged approved canvas system)
 ════════════════════════════════════════════ -->
 <script>
 const canvas = document.getElementById('bg-canvas');
@@ -329,7 +328,7 @@ let W = canvas.width = window.innerWidth;
 let H = canvas.height = window.innerHeight;
 window.addEventListener('resize', () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; });
 
-/* Cursor trail (no extra dot) */
+/* Cursor trail */
 const jc = document.createElement('canvas');
 jc.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99997;';
 document.body.appendChild(jc);
@@ -458,9 +457,6 @@ animate();
 
 <!-- ════════════════════════════════════════════
   SECTION BACKGROUND ANIMATIONS
-  About   → drifting glass orbs
-  Skills  → pulsing dot matrix
-  Projects→ flowing diagonal light streaks
 ════════════════════════════════════════════ -->
 <script>
 function fitCanvas(c) {
@@ -556,47 +552,173 @@ function fitCanvas(c) {
 </script>
 
 <!-- ════════════════════════════════════════════
-  PROFILE TILT — gold glow only, no black ring
+  PROFILE IMAGE — PREMIUM DIRECTIONAL TILT + GLOW
+  No black ring. Amber only.
+  Proximity detection → near state → hover state.
+  Ring angle + glow offset follow cursor direction.
 ════════════════════════════════════════════ -->
 <script>
-const heroImage = document.querySelector('.hero-image');
-let cX=0,cY=0,tX=0,tY=0,af;
+(function() {
+  const heroImg  = document.querySelector('.hero-image');
+  const ring     = document.querySelector('.hero-image-ring');
+  if (!heroImg || !ring) return;
 
-function animTilt() {
-  cX+=(tX-cX)*0.06; cY+=(tY-cY)*0.06;
-  const amt=Math.sqrt(cX**2+cY**2);
-  const glow=Math.min(amt*2.5,30);
-  const glowAlpha=Math.min(0.15+amt*0.025,0.55);
-  heroImage.style.transform=`perspective(700px) rotateX(${cX}deg) rotateY(${cY}deg) scale(1.03)`;
-  heroImage.style.boxShadow=`0 0 ${glow}px rgba(245,166,35,${glowAlpha}),0 0 ${glow*2}px rgba(245,166,35,${glowAlpha*0.4})`;
-  af=requestAnimationFrame(animTilt);
-}
-heroImage.addEventListener('mouseenter', () => { cancelAnimationFrame(af); animTilt(); });
-heroImage.addEventListener('mousemove', e => {
-  const r=heroImage.getBoundingClientRect();
-  tX=((e.clientY-r.top-r.height/2)/(r.height/2))*14;
-  tY=-((e.clientX-r.left-r.width/2)/(r.width/2))*14;
-});
-heroImage.addEventListener('mouseleave', () => {
-  tX=0; tY=0; cancelAnimationFrame(af);
-  function reset() {
-    cX*=0.88; cY*=0.88;
-    const amt=Math.sqrt(cX**2+cY**2);
-    heroImage.style.transform=`perspective(700px) rotateX(${cX}deg) rotateY(${cY}deg) scale(1)`;
-    if(amt>0.05) {
-      heroImage.style.boxShadow=`0 0 ${amt*3}px rgba(245,166,35,${Math.min(amt*0.02,0.15)})`;
-      af=requestAnimationFrame(reset);
-    } else { cX=0;cY=0; heroImage.style.transform=''; heroImage.style.boxShadow='none'; }
+  // ── State
+  let curX = 0, curY = 0;    // current smoothed tilt (degrees)
+  let tgtX = 0, tgtY = 0;    // target tilt from mouse
+  let normX = 0, normY = 0;  // normalised cursor pos [-1..1] within element
+  let isHovering  = false;
+  let isNear      = false;
+  let rafId       = null;
+  let leaveTimer  = null;
+
+  // Proximity threshold (px outside the element that counts as "near")
+  const NEAR_DIST = 80;
+  // Max tilt angle (degrees)
+  const MAX_TILT  = 16;
+
+  // ── Per-frame interpolation loop
+  function tick() {
+    const EASE_HOVER  = 0.072;
+    const EASE_RETURN = 0.055;
+    const ease = isHovering ? EASE_HOVER : EASE_RETURN;
+
+    curX += (tgtX - curX) * ease;
+    curY += (tgtY - curY) * ease;
+
+    const amt = Math.sqrt(curX * curX + curY * curY);
+
+    // Tilt transform — perspective 700px, no scale unless hovering
+    const scale = isHovering ? 1.035 : 1;
+    heroImg.style.transform =
+      `perspective(700px) rotateX(${curX}deg) rotateY(${curY}deg) scale(${scale})`;
+
+    // ── Ring: conic angle follows cursor direction (angle from centre)
+    // angle = atan2 of the cursor relative to image centre, converted to deg
+    const angleDeg = Math.atan2(normY, normX) * (180 / Math.PI);
+    ring.style.setProperty('--ring-angle', `${angleDeg}deg`);
+
+    // ── Glow offset on ::before pseudo — follows tilt, grows with tilt depth
+    // We can't animate pseudo-elements directly, so we use a drop-filter on the img
+    // and a box-shadow on the ring for directional bloom
+    const glowX = normX * amt * 2.2;
+    const glowY = normY * amt * 2.2;
+    const glowBlur  = isHovering ? 24 + amt * 2.5 : 10;
+    const glowAlpha = isHovering ? Math.min(0.15 + amt * 0.025, 0.6) : 0.06;
+    ring.style.boxShadow =
+      `${glowX}px ${glowY}px ${glowBlur}px rgba(245,166,35,${glowAlpha}),
+       0 0 ${glowBlur * 2}px rgba(245,166,35,${glowAlpha * 0.45})`;
+
+    // ── Radial glow on ::after uses CSS custom props
+    // Remap normX/Y from [-1,1] to [0%,100%]
+    const gx = ((normX + 1) / 2 * 100).toFixed(1);
+    const gy = ((normY + 1) / 2 * 100).toFixed(1);
+    heroImg.style.setProperty('--gx', `${gx}%`);
+    heroImg.style.setProperty('--gy', `${gy}%`);
+
+    // Stop animating when nearly at rest (saves battery)
+    if (!isHovering && !isNear && amt < 0.015) {
+      heroImg.style.transform = '';
+      heroImg.style.setProperty('--gx', '50%');
+      heroImg.style.setProperty('--gy', '50%');
+      ring.style.boxShadow = '';
+      cancelAnimationFrame(rafId);
+      rafId = null;
+      return;
+    }
+
+    rafId = requestAnimationFrame(tick);
   }
-  reset();
-});
-heroImage.addEventListener('click', () => { heroImage.classList.add('clicked'); setTimeout(()=>heroImage.classList.remove('clicked'),1200); });
 
-/* Cursor hover expansion on interactive elements */
-document.querySelectorAll('a,button,.btn,.hero-image,.project-card,.contact-item,.tag,.nav-logo').forEach(el => {
-  el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
-  el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
-});
+  function ensureRunning() {
+    if (!rafId) rafId = requestAnimationFrame(tick);
+  }
+
+  // ── Global mouse tracking for proximity detection
+  document.addEventListener('mousemove', e => {
+    const rect = heroImg.getBoundingClientRect();
+    const cx   = rect.left + rect.width  / 2;
+    const cy   = rect.top  + rect.height / 2;
+    const dx   = e.clientX - cx;
+    const dy   = e.clientY - cy;
+    const r    = rect.width / 2;
+
+    // Normalise to [-1, 1] based on radius
+    normX = Math.max(-1, Math.min(1, dx / r));
+    normY = Math.max(-1, Math.min(1, dy / r));
+
+    if (isHovering) {
+      // Full tilt inside element
+      tgtX = (-normY * MAX_TILT);
+      tgtY = (normX  * MAX_TILT);
+    } else {
+      // Proximity: how far outside the ring edge?
+      const dist = Math.sqrt(dx * dx + dy * dy) - r;
+      if (dist < NEAR_DIST && dist > 0) {
+        // Gentle pull toward cursor when nearby
+        const t = 1 - dist / NEAR_DIST;         // 0…1 (0 = edge, 1 = at radius)
+        tgtX = (-normY * MAX_TILT * t * 0.3);
+        tgtY = (normX  * MAX_TILT * t * 0.3);
+        if (!isNear) {
+          isNear = true;
+          heroImg.classList.add('img-near');
+          ensureRunning();
+        }
+      } else if (dist >= NEAR_DIST) {
+        if (isNear && !isHovering) {
+          isNear = false;
+          heroImg.classList.remove('img-near');
+        }
+        // Still animate back to zero if we were tilted
+        tgtX = 0; tgtY = 0;
+      }
+    }
+  });
+
+  // ── Hover enter — smooth acceleration
+  heroImg.addEventListener('mouseenter', () => {
+    clearTimeout(leaveTimer);
+    isHovering = true;
+    isNear     = false;
+    heroImg.classList.remove('img-near');
+    heroImg.classList.add('img-hover');
+    ensureRunning();
+  });
+
+  // ── Hover leave — silky deceleration back to rest
+  heroImg.addEventListener('mouseleave', () => {
+    isHovering = false;
+    heroImg.classList.remove('img-hover');
+
+    // Brief delay before removing near, so state resolves smoothly
+    leaveTimer = setTimeout(() => {
+      isNear = false;
+      heroImg.classList.remove('img-near');
+    }, 400);
+
+    tgtX = 0; tgtY = 0;
+    ensureRunning(); // keep animating until fully at rest
+  });
+
+  // ── Click burst effect
+  heroImg.addEventListener('click', () => {
+    heroImg.classList.add('clicked');
+    // Tiny scale punch on click
+    heroImg.style.transform =
+      `perspective(700px) rotateX(${curX}deg) rotateY(${curY}deg) scale(1.06)`;
+    setTimeout(() => {
+      heroImg.classList.remove('clicked');
+    }, 1100);
+  });
+
+  // ── Cursor hover expansion on interactive elements (existing behaviour)
+  document.querySelectorAll('a,button,.btn,.hero-image,.project-card,.contact-item,.tag,.nav-logo')
+    .forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+    });
+
+})();
 </script>
 
 </body>
