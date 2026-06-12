@@ -788,7 +788,7 @@ section:not(.hero) {
   .hero { flex-direction:column;text-align:center;padding:120px 20px 60px;gap:40px;justify-content:center;min-height:100vh; }
   .hero-image { width:220px;height:220px;order:-1; }
   .hero-image img { width:220px;height:220px; }
-  .hero-image-ring { inset:-4px; }
+  .hero-image-ring { inset: 0px; }
   .hero-content { max-width:100%; }
   .hero-subtitle { margin:0 auto 40px; }
   .hero-buttons { justify-content:center; }
