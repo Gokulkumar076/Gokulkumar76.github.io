@@ -787,7 +787,18 @@ section:not(.hero) {
    MOBILE
 ══════════════════════════════════════════════ */
 @media (max-width:768px) {
-  .navbar { top:0;left:0;right:0;transform:none;width:100%;min-width:unset;border-radius:0;padding:12px 16px;gap:0;justify-content:space-between;border-left:none;border-right:none;border-top:none; }
+  .navbar {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    transform: none;
+    width: auto;
+    min-width: unset;
+    border-radius: var(--radius-pill);
+    padding: 10px 16px;
+    gap: 0;
+    justify-content: space-between;
+  }
   .nav-logo { font-size:16px; }
   .nav-links { gap:0; }
   .nav-links li a { padding:6px 8px;font-size:11px;letter-spacing:0; }
