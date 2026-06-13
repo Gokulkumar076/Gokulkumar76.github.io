@@ -13,7 +13,8 @@
 <body>
 
 <!-- ════════════════════════════════════════════
-  PAGE TRANSITION — reveal on arrival
+  PAGE TRANSITION — reveal on arrival + staggered
+  hero entrance as the gold dissolves away
 ════════════════════════════════════════════ -->
 <div id="page-transition"></div>
 <style>
@@ -23,7 +24,7 @@
     background: #06060a;
     z-index: 999999;
     clip-path: circle(150% at var(--tx, 50%) var(--ty, 50%));
-    transition: clip-path 0.9s cubic-bezier(0.76, 0, 0.24, 1);
+    transition: clip-path 0.8s cubic-bezier(0.76, 0, 0.24, 1);
     pointer-events: all;
   }
   #page-transition::before {
@@ -35,14 +36,34 @@
       rgba(245,166,35,0.15) 18%,
       transparent 30%);
     opacity: 1;
-    transition: opacity 0.6s ease;
+    transition: opacity 0.5s ease;
+    animation: transitionPulse 1.2s ease-in-out infinite;
+  }
+  @keyframes transitionPulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.7; }
   }
   #page-transition.reveal {
     clip-path: circle(0% at var(--tx, 50%) var(--ty, 50%));
     pointer-events: none;
   }
   #page-transition.reveal::before {
+    animation: none;
     opacity: 0;
+  }
+
+  /* Hero entrance — elements fade/slide in one by one */
+  .hero-content > *,
+  .hero-image {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.85s cubic-bezier(0.16,1,0.3,1),
+                 transform 0.85s cubic-bezier(0.16,1,0.3,1);
+  }
+  .hero-content > *.hero-show,
+  .hero-image.hero-show {
+    opacity: 1;
+    transform: translateY(0);
   }
 </style>
 <script>
@@ -55,14 +76,22 @@
   overlay.style.setProperty('--ty', y + '%');
 
   requestAnimationFrame(() => {
-    requestAnimationFrame(() => overlay.classList.add('reveal'));
+    requestAnimationFrame(() => {
+      overlay.classList.add('reveal');
+
+      /* Stagger hero elements in as the gold dissolves */
+      const heroEls = document.querySelectorAll('.hero-content > *, .hero-image');
+      heroEls.forEach((el, i) => {
+        setTimeout(() => el.classList.add('hero-show'), 200 + i * 130);
+      });
+    });
   });
 
   setTimeout(() => {
     overlay.remove();
     sessionStorage.removeItem('transitionX');
     sessionStorage.removeItem('transitionY');
-  }, 1100);
+  }, 950);
 })();
 </script>
 
