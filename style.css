@@ -835,3 +835,22 @@ section:not(.hero) {
     background: rgba(10,10,20,0.92) !important;
   }
 }
+
+body {
+  /* existing properties stay the same, just add: */
+  background: transparent;
+  isolation: auto; /* removes stacking context interference */
+}
+
+html {
+  background: var(--bg-deep); /* #06060a — moved here so body is transparent */
+}
+
+#bg-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: -1;          /* behind everything */
+  pointer-events: none;
+  display: block;
+}
