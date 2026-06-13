@@ -331,29 +331,6 @@
     opacity: 1;
   }
 </style>
-<script>
-  const enterBtn = document.getElementById('enterBtn');
-  const overlay  = document.getElementById('page-transition');
-
-  enterBtn.addEventListener('click', function(e) {
-    e.preventDefault();
-
-    const x = (e.clientX / window.innerWidth)  * 100;
-    const y = (e.clientY / window.innerHeight) * 100;
-
-    overlay.style.setProperty('--tx', x + '%');
-    overlay.style.setProperty('--ty', y + '%');
-
-    sessionStorage.setItem('transitionX', x);
-    sessionStorage.setItem('transitionY', y);
-
-    overlay.classList.add('active');
-
-    setTimeout(() => {
-      window.location.href = 'portfolio.html';
-    }, 900);
-  });
-</script>
 
 <!-- 3D scene -->
 <canvas id="three-canvas"></canvas>
@@ -721,25 +698,30 @@ const clock = new THREE.Clock();
     },1580);
   }
 
-  /* Enter */
-  document.getElementById('enterBtn').addEventListener('click',()=>{
-    const ov=document.getElementById('exit-overlay');
-    const inner=document.getElementById('welcome');
-    inner.style.transition='transform .5s ease,filter .5s ease,opacity .5s ease';
-    inner.style.transform='scale(1.07)';
-    inner.style.filter='blur(6px)';
-    inner.style.opacity='0';
-    ov.style.background='#f5a623';
-    ov.style.transition='opacity .14s ease';
-    ov.style.opacity='.2';
-    setTimeout(()=>{
-      ov.style.background='#06060a';
-      ov.style.transition='opacity .5s ease';
-      ov.style.opacity='1';
-    },160);
-    setTimeout(()=>{ window.location.href='portfolio.html'; },760);
+/* Enter */
+  document.getElementById('enterBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+
+    const x = (e.clientX / window.innerWidth) * 100;
+    const y = (e.clientY / window.innerHeight) * 100;
+    sessionStorage.setItem('transitionX', x);
+    sessionStorage.setItem('transitionY', y);
+
+    const overlay = document.getElementById('page-transition');
+    overlay.style.setProperty('--tx', x + '%');
+    overlay.style.setProperty('--ty', y + '%');
+    overlay.classList.add('active');
+
+    const inner = document.getElementById('welcome');
+    inner.style.transition = 'transform .5s ease, filter .5s ease, opacity .5s ease';
+    inner.style.transform = 'scale(1.07)';
+    inner.style.filter = 'blur(6px)';
+    inner.style.opacity = '0';
+
+    setTimeout(() => {
+      window.location.href = 'portfolio.html';
+    }, 900);
   });
-})();
 </script>
 
 </body>
