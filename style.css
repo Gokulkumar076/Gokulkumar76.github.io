@@ -78,6 +78,9 @@ ul { list-style:none; }
     0 4px 24px var(--glass-shadow),
     0 1px 0 rgba(255,255,255,0.04);
 }
+/* ── Custom cursor: hide default, trail canvas takes over ── */
+* { cursor: none !important; }
+@media (max-width:768px) { * { cursor:auto !important; } }
 
 /* ══════════════════════════════════════════════
    NAVBAR — floating frosted pill
