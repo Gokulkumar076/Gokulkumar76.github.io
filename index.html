@@ -853,6 +853,43 @@ function fitCanvas(c) {
 </script>
 
 <!-- ════════════════════════════════════════════
+  CURSOR JELLY TRAIL
+════════════════════════════════════════════ -->
+<script>
+const jc = document.createElement('canvas');
+jc.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99997;';
+document.body.appendChild(jc);
+const jCtx = jc.getContext('2d');
+jc.width = window.innerWidth; jc.height = window.innerHeight;
+window.addEventListener('resize', () => { jc.width = window.innerWidth; jc.height = window.innerHeight; });
+
+let mX=-200, mY=-200;
+let isMobileCursor = window.innerWidth <= 768;
+window.addEventListener('resize', () => { isMobileCursor = window.innerWidth <= 768; });
+document.addEventListener('mousemove', e => { mX = e.clientX; mY = e.clientY; });
+
+const TLEN = 10;
+const trail = Array.from({length:TLEN}, () => ({x:-200,y:-200}));
+function drawJelly() {
+  if (isMobileCursor) { jCtx.clearRect(0,0,jc.width,jc.height); requestAnimationFrame(drawJelly); return; }
+  trail[0].x += (mX-trail[0].x)*0.5; trail[0].y += (mY-trail[0].y)*0.5;
+  for (let i=1;i<TLEN;i++) { trail[i].x += (trail[i-1].x-trail[i].x)*0.55; trail[i].y += (trail[i-1].y-trail[i].y)*0.55; }
+  jCtx.clearRect(0,0,jc.width,jc.height);
+  if (mX<-100) { requestAnimationFrame(drawJelly); return; }
+  for (let i=TLEN-1;i>=0;i--) {
+    const t=1-i/TLEN, r=1+t*5, op=0.12+t*0.55;
+    const g=jCtx.createRadialGradient(trail[i].x,trail[i].y,0,trail[i].x,trail[i].y,r*2.5);
+    g.addColorStop(0,`rgba(245,166,35,${op*0.9})`); g.addColorStop(0.5,`rgba(245,166,35,${op*0.4})`); g.addColorStop(1,'rgba(245,166,35,0)');
+    jCtx.beginPath(); jCtx.arc(trail[i].x,trail[i].y,r*2.5,0,Math.PI*2); jCtx.fillStyle=g; jCtx.fill();
+    jCtx.beginPath(); jCtx.arc(trail[i].x,trail[i].y,r,0,Math.PI*2);
+    jCtx.fillStyle=`rgba(255,190,50,${op})`; jCtx.shadowBlur=14; jCtx.shadowColor='#f5a623'; jCtx.fill(); jCtx.shadowBlur=0;
+  }
+  requestAnimationFrame(drawJelly);
+}
+drawJelly();
+</script>
+
+<!-- ════════════════════════════════════════════
   PROFILE TILT — gold glow only, no black ring
 ════════════════════════════════════════════ -->
 <script>
@@ -896,43 +933,5 @@ document.querySelectorAll('a,button,.btn,.hero-image,.project-card,.contact-item
 });
 </script>
 
-<!-- ════════════════════════════════════════════
-  PROFILE TILT — directional glow follows cursor
-════════════════════════════════════════════ -->
-<script>
-const heroImage = document.querySelector('.hero-image');
-let cX=0,cY=0,tX=0,tY=0,af;
-
-function animTilt() {
-  cX+=(tX-cX)*0.06; cY+=(tY-cY)*0.06;
-  const amt=Math.sqrt(cX**2+cY**2);
-  const glow=Math.min(amt*2.5,30);
-  const glowAlpha=Math.min(0.15+amt*0.025,0.55);
-  const glowX=-cY*2, glowY=cX*2;
-  heroImage.style.transform=`perspective(700px) rotateX(${cX}deg) rotateY(${cY}deg) scale(1.03)`;
-  heroImage.style.boxShadow=`${glowX}px ${glowY}px ${glow}px rgba(245,166,35,${glowAlpha}),0 0 ${glow*2}px rgba(245,166,35,${glowAlpha*0.4})`;
-  af=requestAnimationFrame(animTilt);
-}
-heroImage.addEventListener('mouseenter', () => { cancelAnimationFrame(af); animTilt(); });
-heroImage.addEventListener('mousemove', e => {
-  const r=heroImage.getBoundingClientRect();
-  tX=((e.clientY-r.top-r.height/2)/(r.height/2))*14;
-  tY=-((e.clientX-r.left-r.width/2)/(r.width/2))*14;
-});
-heroImage.addEventListener('mouseleave', () => {
-  tX=0; tY=0; cancelAnimationFrame(af);
-  function reset() {
-    cX*=0.88; cY*=0.88;
-    const amt=Math.sqrt(cX**2+cY**2);
-    heroImage.style.transform=`perspective(700px) rotateX(${cX}deg) rotateY(${cY}deg) scale(1)`;
-    if(amt>0.05) {
-      heroImage.style.boxShadow=`0 0 ${amt*3}px rgba(245,166,35,${Math.min(amt*0.02,0.15)})`;
-      af=requestAnimationFrame(reset);
-    } else { cX=0;cY=0; heroImage.style.transform=''; heroImage.style.boxShadow='none'; }
-  }
-  reset();
-});
-heroImage.addEventListener('click', () => { heroImage.classList.add('clicked'); setTimeout(()=>heroImage.classList.remove('clicked'),1200); });
-</script>
 </body>
 </html>
