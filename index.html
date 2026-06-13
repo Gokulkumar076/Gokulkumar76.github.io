@@ -298,6 +298,63 @@
 </head>
 <body>
 
+<!-- ════════════════════════════════════════════
+  PAGE TRANSITION — wipe out on click
+════════════════════════════════════════════ -->
+<div id="page-transition"></div>
+<style>
+  #page-transition {
+    position: fixed;
+    inset: 0;
+    background: #06060a;
+    z-index: 999999;
+    clip-path: circle(0% at var(--tx, 50%) var(--ty, 50%));
+    transition: clip-path 0.9s cubic-bezier(0.76, 0, 0.24, 1);
+    pointer-events: none;
+  }
+  #page-transition::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--tx, 50%) var(--ty, 50%),
+      rgba(245,166,35,0.5) 0%,
+      rgba(245,166,35,0.15) 18%,
+      transparent 30%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  #page-transition.active {
+    clip-path: circle(150% at var(--tx, 50%) var(--ty, 50%));
+    pointer-events: all;
+  }
+  #page-transition.active::before {
+    opacity: 1;
+  }
+</style>
+<script>
+  const enterBtn = document.getElementById('enterBtn');
+  const overlay  = document.getElementById('page-transition');
+
+  enterBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+
+    const x = (e.clientX / window.innerWidth)  * 100;
+    const y = (e.clientY / window.innerHeight) * 100;
+
+    overlay.style.setProperty('--tx', x + '%');
+    overlay.style.setProperty('--ty', y + '%');
+
+    sessionStorage.setItem('transitionX', x);
+    sessionStorage.setItem('transitionY', y);
+
+    overlay.classList.add('active');
+
+    setTimeout(() => {
+      window.location.href = 'portfolio.html';
+    }, 900);
+  });
+</script>
+
 <!-- 3D scene -->
 <canvas id="three-canvas"></canvas>
 <!-- 2D overlay -->
