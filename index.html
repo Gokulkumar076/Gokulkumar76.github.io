@@ -905,10 +905,12 @@ function animTilt() {
   const amt=Math.sqrt(cX**2+cY**2);
   const glow=Math.min(amt*2.5,30);
   const glowAlpha=Math.min(0.15+amt*0.025,0.55);
+  const glowX=-cY*2, glowY=cX*2;
   heroImage.style.transform=`perspective(700px) rotateX(${cX}deg) rotateY(${cY}deg) scale(1.03)`;
-  heroImage.style.boxShadow=`0 0 ${glow}px rgba(245,166,35,${glowAlpha}),0 0 ${glow*2}px rgba(245,166,35,${glowAlpha*0.4})`;
+  heroImage.style.boxShadow=`${glowX}px ${glowY}px ${glow}px rgba(245,166,35,${glowAlpha}),0 0 ${glow*2}px rgba(245,166,35,${glowAlpha*0.4})`;
   af=requestAnimationFrame(animTilt);
 }
+
 heroImage.addEventListener('mouseenter', () => { cancelAnimationFrame(af); animTilt(); });
 heroImage.addEventListener('mousemove', e => {
   const r=heroImage.getBoundingClientRect();
