@@ -12,10 +12,8 @@
 </head>
 <body>
 
-<!-- ════════════════════════════════════════════
-  PAGE TRANSITION — reveal on arrival + staggered
-  hero entrance as the gold dissolves away
-════════════════════════════════════════════ -->
+<!-- PASTE THIS to REPLACE the old page-transition div+style+script in portfolio.html -->
+
 <div id="page-transition"></div>
 <style>
   #page-transition {
@@ -23,42 +21,20 @@
     inset: 0;
     background: #06060a;
     z-index: 999999;
-    clip-path: circle(150% at var(--tx, 50%) var(--ty, 50%));
-    transition: clip-path 0.8s cubic-bezier(0.76, 0, 0.24, 1);
+    opacity: 1;
+    transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: all;
   }
-  #page-transition::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at var(--tx, 50%) var(--ty, 50%),
-      rgba(245,166,35,0.5) 0%,
-      rgba(245,166,35,0.15) 18%,
-      transparent 30%);
-    opacity: 1;
-    transition: opacity 0.5s ease;
-    animation: transitionPulse 1.2s ease-in-out infinite;
-  }
-  @keyframes transitionPulse {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.7; }
-  }
   #page-transition.reveal {
-    clip-path: circle(0% at var(--tx, 50%) var(--ty, 50%));
+    opacity: 0;
     pointer-events: none;
   }
-  #page-transition.reveal::before {
-    animation: none;
-    opacity: 0;
-  }
-
-  /* Hero entrance — elements fade/slide in one by one */
   .hero-content > *,
   .hero-image {
     opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 0.85s cubic-bezier(0.16,1,0.3,1),
-                 transform 0.85s cubic-bezier(0.16,1,0.3,1);
+    transform: translateY(22px);
+    transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1),
+                transform 0.7s cubic-bezier(0.16,1,0.3,1);
   }
   .hero-content > *.hero-show,
   .hero-image.hero-show {
@@ -69,20 +45,16 @@
 <script>
 (function() {
   const overlay = document.getElementById('page-transition');
-  const x = sessionStorage.getItem('transitionX') || 50;
-  const y = sessionStorage.getItem('transitionY') || 50;
 
-  overlay.style.setProperty('--tx', x + '%');
-  overlay.style.setProperty('--ty', y + '%');
-
+  /* Reveal IMMEDIATELY — no delay, no black gap */
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       overlay.classList.add('reveal');
 
-      /* Stagger hero elements in as the gold dissolves */
+      /* Stagger hero elements in as page fades in */
       const heroEls = document.querySelectorAll('.hero-content > *, .hero-image');
       heroEls.forEach((el, i) => {
-        setTimeout(() => el.classList.add('hero-show'), 200 + i * 130);
+        setTimeout(() => el.classList.add('hero-show'), 150 + i * 110);
       });
     });
   });
@@ -91,7 +63,7 @@
     overlay.remove();
     sessionStorage.removeItem('transitionX');
     sessionStorage.removeItem('transitionY');
-  }, 950);
+  }, 700);
 })();
 </script>
 
