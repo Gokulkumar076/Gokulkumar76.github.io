@@ -90,18 +90,20 @@
     <h1 class="hero-name">Gokul<br>Kumar</h1>
     <p class="hero-title">Computer Science Student &amp; Aspiring Developer</p>
     <p class="hero-subtitle">Third-year B.Tech student building real-world skills through projects and curiosity.</p>
-    <div class="hero-buttons">
-      <a href="#projects" class="btn btn-primary">
-        <span class="btn-icon">▶</span>
-        <span class="btn-label">See My Work</span>
-        <span class="btn-shine"></span>
-      </a>
-      <a href="#contact" class="btn btn-secondary">
-        <span class="btn-label">Let's Connect</span>
-        <span class="btn-dots"><i></i><i></i><i></i></span>
-        <span class="btn-shine"></span>
-      </a>
-    </div>
+   <div class="hero-buttons">
+  <a href="#projects" class="btn-shine" id="btn-work">
+    <span class="shine-sweep"></span>
+    <span class="shine-label">See my work</span>
+    <span class="shine-arrow">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+    </span>
+  </a>
+  <a href="#contact" class="btn-glow" id="btn-connect">
+    <span class="glow-spot" id="glow-spot"></span>
+    <span class="glow-label">Let's connect</span>
+    <span class="glow-dots"><i></i><i></i><i></i></span>
+  </a>
+</div>
   </div>
   <div class="hero-image">
     <div class="hero-image-ring"></div>
@@ -1000,6 +1002,16 @@ heroImage.addEventListener('click', () => { heroImage.classList.add('clicked'); 
 document.querySelectorAll('a,button,.btn,.hero-image,.project-card,.contact-item,.tag,.nav-logo').forEach(el => {
   el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
   el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+});
+</script>
+
+<script>
+const glowBtn = document.getElementById('btn-connect');
+const spot = document.getElementById('glow-spot');
+glowBtn.addEventListener('mousemove', (e) => {
+  const r = glowBtn.getBoundingClientRect();
+  spot.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+  spot.style.setProperty('--my', (e.clientY - r.top) + 'px');
 });
 </script>
 
