@@ -245,178 +245,98 @@ const clk=new THREE.Clock();
     setTimeout(()=>{clearInterval(tick);lpct.textContent='100%';lbar.style.boxShadow='0 0 22px rgba(245,166,35,1)';setTimeout(()=>{lbar.style.boxShadow='0 0 12px rgba(245,166,35,.7)';},300);btn.classList.add('ready');},1580);
   }
 
-  /* ══════════════════════════════════════════
-     SHATTER TRANSITION
-     — Takes a screenshot of the page via canvas,
-       slices it into voronoi-ish polygons,
-       flings them outward with rotation,
-       then navigates immediately (no black gap)
+/* ══════════════════════════════════════════
+     RIPPLE FILL TRANSITION
+     — Amber circle expands from click point,
+       fills screen, navigates mid-animation
+       so no black gap ever appears
   ══════════════════════════════════════════ */
-  function runShatter(clickX, clickY, onDone) {
-    const sc = document.getElementById('shatter-canvas');
+  function runRipple(clickX, clickY, onDone) {
+    const sc  = document.getElementById('shatter-canvas');
     const ctx = sc.getContext('2d');
-    const W = window.innerWidth;
-    const H = window.innerHeight;
-    sc.width = W; sc.height = H;
-    sc.style.opacity = '1';
+    const W   = window.innerWidth;
+    const H   = window.innerHeight;
+    sc.width  = W;
+    sc.height = H;
     sc.classList.add('active');
 
-    /* --- Generate voronoi-ish seed points --- */
-    const PIECES = 28;
-    const seeds = [];
+    const maxR     = Math.sqrt(W * W + H * H);
+    const DURATION = 680; /* ms — fast enough to feel snappy */
+    let start      = null;
+    let navigated  = false;
 
-    /* Always include click point as a seed */
-    seeds.push({x: clickX, y: clickY});
-
-    /* Add random seeds spread across screen */
-    for (let i = 1; i < PIECES; i++) {
-      seeds.push({
-        x: Math.random() * W,
-        y: Math.random() * H
-      });
+    function ease(t) {
+      return t < 0.5
+        ? 2 * t * t
+        : 1 - Math.pow(-2 * t + 2, 2) / 2;
     }
-
-    /* --- Build polygon for each seed via brute-force clipping --- */
-    function buildCell(seedIdx) {
-      /* Start with full screen rect as polygon */
-      let poly = [
-        {x:0,y:0},{x:W,y:0},{x:W,y:H},{x:0,y:H}
-      ];
-      const si = seeds[seedIdx];
-      for (let j = 0; j < seeds.length; j++) {
-        if (j === seedIdx) continue;
-        const sj = seeds[j];
-        /* Clip polygon by perpendicular bisector of si→sj */
-        const mx = (si.x + sj.x) / 2;
-        const my = (si.y + sj.y) / 2;
-        const nx = sj.x - si.x;
-        const ny = sj.y - si.y;
-        poly = clipPolygonByHalfplane(poly, mx, my, nx, ny);
-        if (poly.length === 0) break;
-      }
-      return poly;
-    }
-
-    function clipPolygonByHalfplane(poly, mx, my, nx, ny) {
-      const out = [];
-      for (let i = 0; i < poly.length; i++) {
-        const a = poly[i];
-        const b = poly[(i+1) % poly.length];
-        const da = (a.x-mx)*nx + (a.y-my)*ny;
-        const db = (b.x-mx)*nx + (b.y-my)*ny;
-        if (da <= 0) out.push(a);
-        if ((da < 0 && db > 0) || (da > 0 && db < 0)) {
-          const t = da / (da - db);
-          out.push({x: a.x + t*(b.x-a.x), y: a.y + t*(b.y-a.y)});
-        }
-      }
-      return out;
-    }
-
-    /* --- Capture current screen visually --- */
-    /* We'll draw each shard as a filled amber gradient
-       since we can't do cross-origin canvas capture.
-       Each shard gets a unique gold/dark tone. */
-
-    /* Build all cells */
-    const cells = seeds.map((s, i) => {
-      const poly = buildCell(i);
-      if (poly.length < 3) return null;
-
-      /* Centroid */
-      let cx = 0, cy = 0;
-      poly.forEach(p => { cx += p.x; cy += p.y; });
-      cx /= poly.length; cy /= poly.length;
-
-      /* Direction away from click */
-      let dx = cx - clickX;
-      let dy = cy - clickY;
-      const dist = Math.sqrt(dx*dx + dy*dy) || 1;
-      dx /= dist; dy /= dist;
-
-      /* Speed inversely proportional to distance from click — close pieces fly faster */
-      const speed = 400 + (1 - Math.min(dist / Math.max(W,H), 1)) * 600;
-
-      return {
-        poly, cx, cy, dx, dy,
-        speed,
-        rotSpeed: (Math.random() - 0.5) * 8,
-        /* slight delay for far pieces so shatter radiates outward */
-        delay: Math.min(dist / Math.max(W,H), 1) * 0.12,
-        /* random gold shade */
-        hue: Math.random() > 0.5 ? `rgba(245,166,35,1)` : `rgba(200,120,10,1)`
-      };
-    }).filter(Boolean);
-
-    const DURATION = 0.72; /* seconds total */
-    let start = null;
 
     function frame(ts) {
       if (!start) start = ts;
-      const elapsed = (ts - start) / 1000;
-      const globalT = Math.min(elapsed / DURATION, 1);
+      const elapsed  = ts - start;
+      const t        = Math.min(elapsed / DURATION, 1);
+      const e        = ease(t);
+      const r        = e * maxR * 1.05;
 
       ctx.clearRect(0, 0, W, H);
 
-      /* Dark background behind shards so no white flash */
-      ctx.fillStyle = '#06060a';
-      ctx.fillRect(0, 0, W, H);
-
-      let allGone = true;
-
-      cells.forEach(cell => {
-        const t = Math.max(0, Math.min((elapsed - cell.delay) / (DURATION - cell.delay), 1));
-        if (t < 1) allGone = false;
-
-        /* Ease out cubic */
-        const ease = 1 - Math.pow(1 - t, 3);
-
-        const tx = cell.dx * cell.speed * ease;
-        const ty = cell.dy * cell.speed * ease;
-        const rot = cell.rotSpeed * ease;
-        const alpha = 1 - Math.pow(t, 1.6);
-
-        if (alpha <= 0) return;
-
+      /* Outer dark fill so nothing behind shows */
+      if (r > 0) {
         ctx.save();
-        ctx.translate(cell.cx + tx, cell.cy + ty);
-        ctx.rotate(rot);
-        ctx.globalAlpha = alpha;
-
-        /* Draw shard */
         ctx.beginPath();
-        cell.poly.forEach((p, i) => {
-          const lx = p.x - cell.cx;
-          const ly = p.y - cell.cy;
-          i === 0 ? ctx.moveTo(lx, ly) : ctx.lineTo(lx, ly);
-        });
-        ctx.closePath();
+        ctx.arc(clickX, clickY, r, 0, Math.PI * 2);
+        ctx.clip();
 
-        /* Gold gradient fill */
-        const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, 120);
-        grad.addColorStop(0, '#ffe066');
-        grad.addColorStop(0.4, '#f5a623');
-        grad.addColorStop(1, '#7a3e00');
-        ctx.fillStyle = grad;
-        ctx.fill();
+        /* Background fill */
+        ctx.fillStyle = '#06060a';
+        ctx.fillRect(0, 0, W, H);
 
-        /* Gold edge glow */
-        ctx.strokeStyle = `rgba(255,200,60,${alpha * 0.7})`;
-        ctx.lineWidth = 1.2;
-        ctx.stroke();
+        /* Gold gradient inside circle */
+        const grd = ctx.createRadialGradient(
+          clickX, clickY, 0,
+          clickX, clickY, r
+        );
+        grd.addColorStop(0.00, 'rgba(255,230,80,0.18)');
+        grd.addColorStop(0.25, 'rgba(245,166,35,0.12)');
+        grd.addColorStop(0.60, 'rgba(200,100,10,0.06)');
+        grd.addColorStop(1.00, 'rgba(6,6,10,0)');
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, W, H);
 
         ctx.restore();
-      });
+      }
 
-      if (globalT < 1) {
-        requestAnimationFrame(frame);
-      } else {
-        /* Navigate immediately — portfolio.html has its own reveal,
-           so there will be NO black gap */
+      /* Leading edge amber ring */
+      const ringAlpha = Math.max(0, 1 - t * 1.4);
+      if (ringAlpha > 0) {
+        const ringGrd = ctx.createRadialGradient(
+          clickX, clickY, Math.max(r - 38, 0),
+          clickX, clickY, r + 6
+        );
+        ringGrd.addColorStop(0,   `rgba(255,210,60,0)`);
+        ringGrd.addColorStop(0.4, `rgba(255,190,40,${ringAlpha * 0.7})`);
+        ringGrd.addColorStop(0.7, `rgba(245,166,35,${ringAlpha})`);
+        ringGrd.addColorStop(1,   `rgba(245,166,35,0)`);
+        ctx.beginPath();
+        ctx.arc(clickX, clickY, r, 0, Math.PI * 2);
+        ctx.strokeStyle = ringGrd;
+        ctx.lineWidth   = 42;
+        ctx.stroke();
+      }
+
+      /* Navigate at 55% of animation — screen is fully covered,
+         so portfolio.html starts loading behind the canvas */
+      if (t >= 0.55 && !navigated) {
+        navigated = true;
         onDone();
+      }
+
+      if (t < 1) {
+        requestAnimationFrame(frame);
       }
     }
 
+    sc.style.opacity = '1';
     requestAnimationFrame(frame);
   }
 
@@ -433,9 +353,8 @@ const clk=new THREE.Clock();
     inner.style.transition = 'opacity 0.15s ease';
     inner.style.opacity = '0';
 
-    /* Small delay so the fade starts before shatter begins */
-    setTimeout(() => {
-      runShatter(x, y, () => {
+   setTimeout(() => {
+      runRipple(x, y, () => {
         window.location.href = 'portfolio.html';
       });
     }, 80);
