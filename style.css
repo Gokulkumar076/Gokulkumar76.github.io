@@ -920,3 +920,83 @@ html {
   pointer-events: none;
   display: block;
 }
+
+/* ══════════════════════════════════════════════
+   SHINY TEXT EFFECT
+   — Moving gradient shimmer across text
+══════════════════════════════════════════════ */
+
+.shiny-text {
+  display: inline-block;
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: shinyMove var(--shine-speed, 3s) linear infinite;
+  animation-delay: var(--shine-delay, 0s);
+}
+
+@keyframes shinyMove {
+  0%   { background-position: 150% center; }
+  100% { background-position: -50% center; }
+}
+
+/* Pause on hover */
+.shiny-text:hover {
+  animation-play-state: paused;
+}
+
+/* ── Hero name — large amber shimmer ── */
+.hero-name.shiny-text {
+  background-image: linear-gradient(
+    120deg,
+    #f5a623 0%,
+    #f5a623 30%,
+    #fff8e1 45%,
+    #ffe082 50%,
+    #fff8e1 55%,
+    #f5a623 70%,
+    #f5a623 100%
+  );
+  --shine-speed: 2.8s;
+  --shine-delay: 0s;
+}
+
+/* ── Section titles — slightly cooler shimmer ── */
+.section-title.shiny-text {
+  background-image: linear-gradient(
+    120deg,
+    #a0a0b8 0%,
+    #a0a0b8 30%,
+    #ffffff 45%,
+    #f5a623 50%,
+    #ffffff 55%,
+    #a0a0b8 70%,
+    #a0a0b8 100%
+  );
+  --shine-speed: 3.5s;
+  --shine-delay: 0s;
+}
+
+/* ── Section title colored <span> inside — keep amber ── */
+.section-title.shiny-text span {
+  background-image: linear-gradient(
+    120deg,
+    #f5a623 0%,
+    #f5a623 30%,
+    #ffffff 45%,
+    #ffecb3 50%,
+    #ffffff 55%,
+    #f5a623 70%,
+    #f5a623 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  display: inline;
+  animation: shinyMove var(--shine-speed, 3.5s) linear infinite;
+  text-shadow: none;
+}
