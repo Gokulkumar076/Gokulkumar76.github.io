@@ -965,8 +965,11 @@ html {
     #f5a623 70%,
     #f5a623 100%
   );
+  background-size: 200% 100%;
   --shine-speed: 2.8s;
   --shine-delay: 0s;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
 }
 
 /* ── Section titles — slightly cooler shimmer ── */
