@@ -399,7 +399,13 @@ section:not(.hero) {
   color: var(--text-primary);
   letter-spacing: -0.03em;
 }
-.section-title span { color:var(--accent); text-shadow: 0 0 24px rgba(245,166,35,0.3); }
+.section-title span {
+  color: var(--accent);
+  text-shadow: none;
+}
+.section-title:not(.shiny-text) span {
+  text-shadow: 0 0 24px rgba(245,166,35,0.3);
+}
 .section-line {
   flex:1; height:1px;
   background: linear-gradient(to right, rgba(245,166,35,0.35), transparent);
