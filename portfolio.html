@@ -628,8 +628,8 @@ function initSectionAnimations() {
     els.forEach(el => obs.observe(el));
   }
 
-  makeObs('.about-card',      0.2, el => (el.dataset.delay || 0) * 120);
-  makeObs('.about-p',         0.2, (el, i) => i * 150);
+  makeObs('.about-lead, .about-p', 0.2, (el, i) => i * 150);
+  makeObs('.about-sign',      0.3, () => 200);
   makeObs('.skill-category',  0.2, (el, i) => i * 150);
   makeObs('.skill-tags .tag', 0.3, (el, i) => i * 55);
   makeObs('.project-card',    0.1, (el, i) => i * 180);
@@ -1079,6 +1079,21 @@ glowBtn.addEventListener('mousemove', (e) => {
   spot.style.setProperty('--mx', (e.clientX - r.left) + 'px');
   spot.style.setProperty('--my', (e.clientY - r.top) + 'px');
 });
+</script>
+
+<script>
+/* ── Fanned ID-file entrance animation ── */
+(function() {
+  const cards = document.querySelectorAll('.id-card');
+  if (!cards.length) return;
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('animate-in');
+      else entry.target.classList.remove('animate-in');
+    });
+  }, { threshold: 0.25 });
+  cards.forEach(c => obs.observe(c));
+})();
 </script>
 
 </body>
