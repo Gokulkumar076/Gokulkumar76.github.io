@@ -650,7 +650,7 @@ function initSectionAnimations() {
     els.forEach(el => obs.observe(el));
   }
 
-  makeObs('.about-lead, .about-p', 0.2, (el, i) => i * 150);
+  makeObs('.about-lead, .about-p, .about-interests', 0.2, (el, i) => i * 150);
   makeObs('.about-sign',      0.3, () => 200);
   makeObs('.skill-category',  0.2, (el, i) => i * 150);
   makeObs('.skill-tags .tag', 0.3, (el, i) => i * 55);
