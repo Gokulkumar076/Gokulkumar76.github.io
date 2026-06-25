@@ -514,7 +514,7 @@ section:not(.hero) {
 }
 .about-sign.animate-in .sign-path path {
   stroke-dashoffset: 0;
-  animation: signGlow 3s ease-in-out 1.8s infinite;
+  animation: signGlow 8s ease-in-out 2.0s infinite;
 }
 .about-sign:hover .sign-path path {
   stroke-dashoffset: 0;
@@ -542,7 +542,7 @@ section:not(.hero) {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted);
-  transition: color 0.7s ease;
+  transition: color 0.5s ease;
 }
 .about-sign:hover .sign-label { color: var(--accent); }}
 .sign-label {
