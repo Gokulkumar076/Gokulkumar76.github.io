@@ -1189,3 +1189,101 @@ html {
   animation: shinyMove var(--shine-speed, 3.5s) linear infinite;
   text-shadow: none;
 }
+/* ══════════════════════════════════════════════
+   ABOUT — Interest chips + enhancements
+══════════════════════════════════════════════ */
+.about-interests {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s;
+}
+.about-lead.animate-in ~ .about-p.animate-in ~ .about-interests,
+.about-interests.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.about-interest-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px 9px 12px;
+  background: rgba(255,255,255,0.038);
+  backdrop-filter: blur(16px) saturate(1.5);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-md);
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  transition: all 0.32s cubic-bezier(0.34,1.2,0.64,1);
+  animation: chipEntrance 0.55s cubic-bezier(0.16,1,0.3,1) both;
+  animation-delay: calc(0.55s + var(--chip-delay, 0s));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 14px rgba(0,0,0,0.28);
+}
+
+@keyframes chipEntrance {
+  from { opacity: 0; transform: translateY(14px) scale(0.93); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Amber top-edge shimmer on hover — matches card language */
+.about-interest-chip::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.about-interest-chip:hover::before { opacity: 1; }
+.about-interest-chip:hover {
+  border-color: rgba(245,166,35,0.22);
+  background: rgba(255,255,255,0.065);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    0 0 20px rgba(245,166,35,0.10),
+    0 12px 28px rgba(0,0,0,0.38);
+}
+
+.chip-icon {
+  font-size: 18px;
+  transition: transform 0.3s cubic-bezier(0.34,1.4,0.64,1);
+  flex-shrink: 0;
+}
+.about-interest-chip:hover .chip-icon {
+  transform: scale(1.2) rotate(-5deg);
+}
+
+.chip-label {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.03em;
+  transition: color 0.25s ease;
+}
+.about-interest-chip:hover .chip-label { color: var(--accent); }
+
+.chip-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  transition: color 0.25s ease;
+  padding-left: 6px;
+  border-left: 1px solid rgba(255,255,255,0.08);
+}
+.about-interest-chip:hover .chip-sub { color: var(--text-secondary); }
+
+@media (max-width: 768px) {
+  .about-interests { gap: 8px; }
+  .about-interest-chip { padding: 8px 12px 8px 10px; }
+  .chip-sub { display: none; }
+}
