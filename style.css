@@ -510,8 +510,41 @@ section:not(.hero) {
   stroke-dasharray: 320;
   stroke-dashoffset: 320;
   transition: stroke-dashoffset 1.6s cubic-bezier(0.16,1,0.3,1);
+  filter: drop-shadow(0 0 0px rgba(245,166,35,0));
 }
-.about-sign.animate-in .sign-path path { stroke-dashoffset: 0; }
+.about-sign.animate-in .sign-path path {
+  stroke-dashoffset: 0;
+  animation: signGlow 3s ease-in-out 1.8s infinite;
+}
+.about-sign:hover .sign-path path {
+  stroke-dashoffset: 0;
+  stroke: #ffdb80;
+  filter: drop-shadow(0 0 8px rgba(245,166,35,0.9));
+  animation: signTrace 0.8s cubic-bezier(0.16,1,0.3,1) forwards,
+             signGlowHover 1.5s ease-in-out 0.8s infinite;
+}
+@keyframes signGlow {
+  0%,100% { filter: drop-shadow(0 0 2px rgba(245,166,35,0.3)); }
+  50%     { filter: drop-shadow(0 0 10px rgba(245,166,35,0.75)); }
+}
+@keyframes signGlowHover {
+  0%,100% { filter: drop-shadow(0 0 6px rgba(245,166,35,0.7)); stroke: #f5a623; }
+  50%     { filter: drop-shadow(0 0 16px rgba(245,166,35,1)); stroke: #ffe082; }
+}
+@keyframes signTrace {
+  from { stroke-dashoffset: 320; }
+  to   { stroke-dashoffset: 0; }
+}
+.about-sign .sign-path { cursor: pointer; }
+.sign-label {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition: color 0.3s ease;
+}
+.about-sign:hover .sign-label { color: var(--accent); }}
 .sign-label {
   font-family: var(--font-heading);
   font-size: 12px;
