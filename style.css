@@ -542,7 +542,7 @@ section:not(.hero) {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted);
-  transition: color 0.3s ease;
+  transition: color 0.7s ease;
 }
 .about-sign:hover .sign-label { color: var(--accent); }}
 .sign-label {
